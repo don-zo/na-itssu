@@ -1,5 +1,5 @@
-import BillCard from "@/components/BillCard";
 import { sampleBills } from "@/mockdata/bills";
+import BillCard from "@/components/BillCard";
 
 interface BillCardListProps {
   currentPage: number;

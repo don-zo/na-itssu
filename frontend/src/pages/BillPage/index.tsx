@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import { sampleBills } from "@/mockdata/bills";
 import BillCardList from "@/pages/BillPage/components/BillCardList";
 import Pagination from "@/components/Pagination";
+import Chatbot from "@/components/Chatbot";
 
 export const BillPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,6 +29,9 @@ export const BillPage = () => {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
+      </div>
+      <div className="bg-gray-50 p-8">
+        <Chatbot />
       </div>
     </>
   );
