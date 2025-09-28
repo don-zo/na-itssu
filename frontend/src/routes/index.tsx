@@ -4,7 +4,7 @@ import Home from "@/pages/Home";
 import BillPage from "@/pages/BillPage";
 import TestPage from "@/pages/TestPage";
 
-export const router = createBrowserRouter([
+export const RouterPath = createBrowserRouter([
   {
     path: ROUTES.HOME,
     element: <Home />,
