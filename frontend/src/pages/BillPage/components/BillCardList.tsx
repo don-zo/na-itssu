@@ -1,5 +1,6 @@
-import BillCard from "@/components/BillCard";
 import { sampleBills } from "@/mockdata/bills";
+import BillCard from "@/components/BillCard";
+import Chatbot from "@/components/Chatbot";
 
 interface BillCardListProps {
   currentPage: number;
@@ -31,6 +32,9 @@ export const BillCardList = ({
             />
           ))}
         </div>
+      </div>
+      <div className="min-h-screen bg-gray-50 p-8">
+        <Chatbot />
       </div>
     </>
   );
