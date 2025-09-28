@@ -32,27 +32,33 @@ export const Chatbot = () => {
   }, [messages]);
 
   const handleSendMessage = () => {
-    if (inputText.trim()) {
-      const newMessage: Message = {
-        id: messages.length + 1,
-        text: inputText,
+    const trimmed = inputText.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    setMessages((prev) => {
+      const userMessage: Message = {
+        id: prev.length + 1,
+        text: trimmed,
         isUser: true,
         timestamp: new Date(),
       };
+      return [...prev, userMessage];
+    });
+    setInputText("");
 
-      setMessages([...messages, newMessage]);
-      setInputText("");
-
-      setTimeout(() => {
+    setTimeout(() => {
+      setMessages((prev) => {
         const botResponse: Message = {
-          id: messages.length + 2,
+          id: prev.length + 1,
           text: "감사합니다. 더 자세한 도움이 필요하시면 말씀해 주세요!",
           isUser: false,
           timestamp: new Date(),
         };
-        setMessages((prev) => [...prev, botResponse]);
-      }, 1000);
-    }
+        return [...prev, botResponse];
+      });
+    }, 1000);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
