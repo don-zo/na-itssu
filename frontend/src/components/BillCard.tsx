@@ -9,6 +9,7 @@ export interface BillCardProps {
   participants: number;
   agreeRate: number;
   disagreeRate: number;
+  width: string;
 }
 
 const BillCard: React.FC<BillCardProps> = ({
@@ -19,6 +20,7 @@ const BillCard: React.FC<BillCardProps> = ({
   participants,
   agreeRate,
   disagreeRate,
+  width = "360px",
 }) => {
   const [totalVotes, setTotalVotes] = useState(participants);
   const [agreeVotes, setAgreeVotes] = useState(
@@ -53,7 +55,10 @@ const BillCard: React.FC<BillCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-xs p-5 flex flex-col gap-3 w-[360px]">
+    <div 
+      className="bg-white rounded-xl border border-gray-100 shadow-xs p-5 flex flex-col gap-3"
+      style={{ width }}
+    >
       <div className="flex justify-between items-center text-xs text-gray-500">
         <span className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium">
           {category}
