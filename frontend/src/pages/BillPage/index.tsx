@@ -6,7 +6,7 @@ import Pagination from "@/components/Pagination";
 import SearchBar from "@/pages/BillPage/components/SearchBar";
 import FilterButtons from "@/pages/BillPage/components/FilterButtons";
 import type { SortType } from "@/pages/BillPage/components/FilterButtons";
-import Chatbot from "@/components/Chatbot";
+import Chatbot from "@/components/chatbot";
 
 export const BillPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,7 +65,7 @@ export const BillPage = () => {
     <>
       <Header />
       <div className="text-center container mx-auto px-4 py-8 mt-20">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">법률안 목록</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">법률안 목록</h1>
         <p className="text-gray-600 mb-8">
           현재 논의 중인 모든 법률안을 확인하고 투표에 참여하세요
         </p>

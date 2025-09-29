@@ -5,4 +5,7 @@ export const ROUTES = {
     DETAIL: "/bills/:id",
     FILTER: "/bills/:sort/:tag",
   },
+  CONFERENCE: {
+    DEFAULT: "/conferences",
+  },
 } as const;

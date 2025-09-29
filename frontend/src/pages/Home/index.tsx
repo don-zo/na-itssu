@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import Chatbot from "@/components/Chatbot";
+import Chatbot from "@/components/chatbot";
 
 export const Home = () => {
   return (
