@@ -6,6 +6,7 @@ import Pagination from "@/components/Pagination";
 import SearchBar from "@/pages/BillPage/components/SearchBar";
 import FilterButtons from "@/pages/BillPage/components/FilterButtons";
 import type { SortType } from "@/pages/BillPage/components/FilterButtons";
+import Chatbot from "@/components/Chatbot";
 
 export const BillPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -105,6 +106,7 @@ export const BillPage = () => {
             </div>
           </div>
         )}
+      </div>
       <div className="bg-gray-50 p-8">
         <Chatbot />
       </div>
