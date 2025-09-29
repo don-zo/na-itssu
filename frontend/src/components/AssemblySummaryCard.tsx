@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { CalendarDays, Clock, FileText, Play, Download } from "lucide-react";
 
 interface AgendaItem {

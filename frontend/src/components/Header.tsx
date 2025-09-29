@@ -14,7 +14,7 @@ export const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to={ROUTES.HOME} className="flex items-center">
-          <img src={LogoIcon} alt="로고" className="w-10 h-10 mr-2" /> 
+            <img src={LogoIcon} alt="로고" className="w-10 h-10 mr-2" />
             <h1 className="text-2xl font-bold">국회</h1>
             <h1 className="text-2xl font-bold text-blue-700">잇슈</h1>
           </Link>
@@ -41,9 +41,9 @@ export const Header = () => {
               법률안 목록
             </Link>
             <Link
-              to="/conference"
+              to={ROUTES.CONFERENCE.DEFAULT}
               className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
-                isActive("/conference")
+                isActive(ROUTES.CONFERENCE.DEFAULT)
                   ? "bg-blue-100 text-blue-700 font-medium"
                   : "text-gray-600 hover:text-blue-700 hover:bg-blue-50"
               }`}
