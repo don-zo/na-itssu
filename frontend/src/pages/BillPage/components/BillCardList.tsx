@@ -1,18 +1,44 @@
-import { sampleBills } from "@/mockdata/bills";
 import BillCard from "@/components/BillCard";
+import { sampleBills } from "@/mockdata/bills";
+import type { SortType } from "@/pages/BillPage/components/FilterButtons";
 
 interface BillCardListProps {
   currentPage: number;
   itemsPerPage: number;
+  searchQuery?: string;
+  sortType?: SortType;
 }
 
 export const BillCardList = ({
   currentPage,
   itemsPerPage,
+  searchQuery = "",
+  sortType = "latest",
 }: BillCardListProps) => {
+  // 검색어가 있으면 필터링, 없으면 모든 법률안
+  const filteredBills = searchQuery
+    ? sampleBills.filter(
+        (bill) =>
+          bill.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          bill.summary.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : sampleBills;
+
+  // 필터링 기능
+  const sortedBills = [...filteredBills].sort((a, b) => {
+    switch (sortType) {
+      case "latest":
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      case "votes":
+        return b.id - a.id;
+      default:
+        return 0;
+    }
+  });
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentBills = sampleBills.slice(startIndex, endIndex);
+  const currentBills = sortedBills.slice(startIndex, endIndex);
 
   return (
     <>
