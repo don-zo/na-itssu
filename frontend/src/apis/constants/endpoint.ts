@@ -5,3 +5,7 @@ export const CHATBOT_ENDPOINTS = {
   CREATE_SESSION: "/session",
   SEND_MESSAGE: "/chat/stream",
 };
+
+export const MEETINGS_ENDPOINTS = {
+  GET_MEETINGS: "/api/meetings",
+};
