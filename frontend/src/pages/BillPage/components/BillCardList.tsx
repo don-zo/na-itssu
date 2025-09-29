@@ -4,15 +4,26 @@ import { sampleBills } from "@/mockdata/bills";
 interface BillCardListProps {
   currentPage: number;
   itemsPerPage: number;
+  searchQuery?: string;
 }
 
 export const BillCardList = ({
   currentPage,
   itemsPerPage,
+  searchQuery = "",
 }: BillCardListProps) => {
+  // 검색어가 있으면 필터링, 없으면 모든 법률안
+  const filteredBills = searchQuery
+    ? sampleBills.filter(
+        (bill) =>
+          bill.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          bill.summary.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : sampleBills;
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentBills = sampleBills.slice(startIndex, endIndex);
+  const currentBills = filteredBills.slice(startIndex, endIndex);
 
   return (
     <>
