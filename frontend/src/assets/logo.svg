@@ -1,0 +1,12 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#3B82F6; stop-opacity:1" /> <!-- blue-500 -->
+                                <stop offset="100%" style="stop-color:#6366F1; stop-opacity:1" /> <!-- indigo-500 -->
+                            </linearGradient>
+                        </defs>
+                        <!-- 국회의사당 돔 + 말풍선 -->
+                        <path d="M50 5 C25 5, 5 25, 5 50 C5 70, 20 90, 45 95 L45 75 C30 70, 20 60, 20 50 C20 30, 35 15, 50 15 C65 15, 80 30, 80 50 C80 60, 70 70, 55 75 L55 95 C80 90, 95 70, 95 50 C95 25, 75 5, 50 5 Z" fill="url(#logoGradient)"/>
+                        <!-- 투표 체크 표시 -->
+                        <path d="M40 50 L50 60 L65 45" stroke="white" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>

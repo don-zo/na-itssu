@@ -1,52 +1,101 @@
+import AssemblySummaryCard from "@/components/AssemblySummaryCard";
+import BillCard from "@/components/BillCard";
+import Header from "@/components/Header";
+import Chatbot from "@/components/chatbot";
+import { TrendingUp, Clock, ArrowRight } from "lucide-react";
+
 export const Home = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 text-center">
-        <div className="mb-6">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            안녕하세요! 👋
-          </h1>
-          <p className="text-gray-600 text-lg">
-            홈 페이지에 오신 것을 환영합니다
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          <div className="bg-blue-50 rounded-lg p-4">
-            <h2 className="text-xl font-semibold text-blue-800 mb-2">
-              프로젝트 정보
-            </h2>
-            <p className="text-blue-600">React + TypeScript + Tailwind CSS</p>
-          </div>
-
-          <div className="bg-green-50 rounded-lg p-4">
-            <h2 className="text-xl font-semibold text-green-800 mb-2">
-              기술 스택
-            </h2>
-            <div className="flex flex-wrap gap-2 justify-center">
-              <span className="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm">
-                React
-              </span>
-              <span className="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm">
-                TypeScript
-              </span>
-              <span className="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm">
-                Tailwind CSS
-              </span>
-              <span className="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm">
-                Vite
-              </span>
+    <>
+      <Header />
+      <div className="bg-gray-50 flex justify-center">
+        <section className="w-full py-16" style={{
+          background: "linear-gradient(to bottom right,#2563EB 60%, #bfdbfe 100%)",
+        }}> 
+          <div className="max-w-5xl mx-auto items-center text-white text-center">
+            <h1 className="text-[48px] font-bold leading-none mt-15 mb-4">
+              시민의 목소리가 만드는<br />
+              더 나은 대한민국
+            </h1>
+            <p className="text-[20px] pt-1 text-gray-300">
+              법률안에 대한 시민들의 의견을 모아 민주주의를 더욱 활성화합니다
+            </p>
+            <div className="mt-7 flex justify-center">
+              <div className="bg-white/10 p-6 rounded-xl shadow-lg w-[680px] flex-col flex items-center justify-center gap-2">
+                <div className="flex items-center mb-2">
+                  <TrendingUp className="text-orange-400 h-6 w-6 mr-2" />
+                  <span className="inline-flex px-3 py-1 bg-orange-400 rounded-full text-xs font-medium">
+                    🔥 최고 인기
+                  </span>
+                </div>
+                <BillCard
+                  category="환경"
+                  title="탄소 중립 기본법"
+                  date="2025.09.01"
+                  description="2050 탄소중립 달성을 위한 기업 탄소배출 의무신고제, 친환경 에너지 전환 지원, 일회용품 사용 제한 강화 등 환경보호를 위한 종합 법안입니다."
+                  participants={19250}
+                  agreeRate={70.2}
+                  disagreeRate={29.8}
+                  width="630px"
+                />
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="mt-8">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-200">
-            시작하기
-          </button>
-        </div>
+        </section>
+          
+        <Chatbot />
       </div>
-    </div>
+      <div className="flex flex-col items-center justify-center mt-15">
+        <div className="flex justify-center items-center">
+          <Clock className="text-blue-600 h-6 w-6 mr-2" />
+          <span className="inline-flex px-3 py-1 bg-blue-600 text-white rounded-full text-[15px] font-medium">
+            오늘의 국회
+          </span>
+        </div>
+        <h1 className="text-[30px] font-bold mt-3">오늘자 국회 회의 요약</h1>
+        <span className="text-[17px] text-gray-500 mt-1 mb-8">AI가 분석한 오늘의 국회 활동을 확인해보세요!</span>
+        <AssemblySummaryCard
+          title="제21대 국회 제3차 본회의"
+          date="2025.09.20"
+          duration="10:00 ~ 16:30"
+          agenda={[
+            { id: 1, text: "탄소중립 기본법 개정안 논의" },
+            { id: 2, text: "청년 주거 지원 정책 보고" },
+            { id: 3, text: "디지털 전환을 위한 교육 인프라 확대" },
+          ]}
+          summary="이번 본회의에서는 기후 변화 대응을 위한 탄소중립 기본법 개정안이 찬성 다수로 가결되었으며, 청년 주거 안정 지원책을 위한 예산 증액안 또한 통과되었습니다. 또한 미래 사회 대비를 위해 디지털 교육 인프라 구축을 전담할 특별위원회를 신설하기로 결정했습니다. 전반적으로 기후·청년·디지털을 중심으로 하는 사회적 의제가 강조된 회의였습니다."
+        />
+      </div>
+      <div className="flex flex-col items-center justify-center mt-15">
+        <div className="flex justify-center items-center">
+          <TrendingUp className="text-blue-600 h-6 w-6 mr-2" />
+          <span className="inline-flex px-3 py-1 bg-gray-100 rounded-full text-[15px] font-medium">
+            실시간 인기
+          </span>
+        </div>
+        <h1 className="text-[30px] font-bold mt-3">투표율이 높은 법률안</h1>
+        <span className="text-[17px] text-gray-500 mt-1 mb-8">시민들의 관심이 많은 법률안에 참여해보세요!</span>
+        <AssemblySummaryCard
+          title="제21대 국회 제3차 본회의"
+          date="2025.09.20"
+          duration="10:00 ~ 16:30"
+          agenda={[
+            { id: 1, text: "탄소중립 기본법 개정안 논의" },
+            { id: 2, text: "청년 주거 지원 정책 보고" },
+            { id: 3, text: "디지털 전환을 위한 교육 인프라 확대" },
+          ]}
+          summary="이번 본회의에서는 기후 변화 대응을 위한 탄소중립 기본법 개정안이 찬성 다수로 가결되었으며, 청년 주거 안정 지원책을 위한 예산 증액안 또한 통과되었습니다. 또한 미래 사회 대비를 위해 디지털 교육 인프라 구축을 전담할 특별위원회를 신설하기로 결정했습니다. 전반적으로 기후·청년·디지털을 중심으로 하는 사회적 의제가 강조된 회의였습니다."
+        />
+      </div>
+      <div className="flex justify-center mt-8 mb-15">
+        <button
+            className="flex items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-[15px] font-medium text-gray-700 hover:bg-gray-100"
+        >
+            모든 법률안 보기
+            <ArrowRight className="h-4 w-4 ml-3 text-gray-700" />
+        </button>
+      </div>
+    </>
   );
 };
 
