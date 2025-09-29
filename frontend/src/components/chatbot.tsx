@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { MessageCircleMore, Send } from "lucide-react";
+import { chatbotService } from "@/apis";
 
 interface Message {
   id: number;
@@ -19,6 +20,9 @@ export const Chatbot = () => {
     },
   ]);
   const [inputText, setInputText] = useState("");
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [streamingMessageId, setStreamingMessageId] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 자동 스크롤 함수
@@ -31,12 +35,13 @@ export const Chatbot = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     const trimmed = inputText.trim();
-    if (!trimmed) {
+    if (!trimmed || isLoading) {
       return;
     }
 
+    // 사용자 메시지 추가
     setMessages((prev) => {
       const userMessage: Message = {
         id: prev.length + 1,
@@ -47,24 +52,96 @@ export const Chatbot = () => {
       return [...prev, userMessage];
     });
     setInputText("");
+    setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      // 첫 번째 메시지이고 세션이 없으면 세션 생성
+      if (!sessionId) {
+        const session = await chatbotService.createSession();
+        setSessionId(session.sessionId);
+        console.log("새로운 세션 생성:", session.sessionId);
+      }
+
+      // 스트리밍 응답을 위한 빈 메시지 생성
+      const botMessageId = messages.length + 2;
+      setStreamingMessageId(botMessageId);
+      
       setMessages((prev) => {
-        const botResponse: Message = {
-          id: prev.length + 1,
-          text: "감사합니다. 더 자세한 도움이 필요하시면 말씀해 주세요!",
+        const botMessage: Message = {
+          id: botMessageId,
+          text: "",
           isUser: false,
           timestamp: new Date(),
         };
-        return [...prev, botResponse];
+        return [...prev, botMessage];
       });
-    }, 1000);
+
+      // 스트리밍 메시지 전송
+      await chatbotService.sendMessageStream(
+        {
+          message: trimmed,
+          sessionId: sessionId!,
+        },
+        // onMessage: 각 청크를 받을 때마다 호출
+        (chunk: string) => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === botMessageId
+                ? { ...msg, text: msg.text + chunk }
+                : msg
+            )
+          );
+        },
+        // onComplete: 스트리밍 완료 시 호출
+        () => {
+          console.log("스트리밍 완료");
+          setStreamingMessageId(null);
+          setIsLoading(false);
+        },
+        // onError: 에러 발생 시 호출
+        (error: Error) => {
+          console.error("스트리밍 에러:", error);
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === botMessageId
+                ? { ...msg, text: "죄송합니다. 일시적인 오류가 발생했습니다." }
+                : msg
+            )
+          );
+          setStreamingMessageId(null);
+          setIsLoading(false);
+        }
+      );
+
+    } catch (error) {
+      console.error("챗봇 API 오류:", error);
+      setMessages((prev) => {
+        const errorMessage: Message = {
+          id: prev.length + 1,
+          text: "죄송합니다. 일시적인 오류가 발생했습니다. 다시 시도해 주세요.",
+          isUser: false,
+          timestamp: new Date(),
+        };
+        return [...prev, errorMessage];
+      });
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !isLoading) {
       handleSendMessage();
     }
+  };
+
+  // 텍스트를 줄바꿈으로 분할하여 렌더링하는 함수
+  const renderTextWithLineBreaks = (text: string) => {
+    return text.split('\n').map((line, index) => (
+      <span key={index}>
+        {line}
+        {index < text.split('\n').length - 1 && <br />}
+      </span>
+    ));
   };
 
   return (
@@ -103,7 +180,12 @@ export const Chatbot = () => {
                       : "bg-gray-100 text-gray-800"
                   }`}
                 >
-                  <p className="text-sm">{message.text}</p>
+                  <p className="text-sm">
+                    {renderTextWithLineBreaks(message.text)}
+                    {streamingMessageId === message.id && (
+                      <span className="inline-block w-2 h-4 bg-gray-400 ml-1 animate-pulse"></span>
+                    )}
+                  </p>
                   <p className="text-xs opacity-70 mt-1">
                     {message.timestamp.toLocaleTimeString("ko-KR", {
                       hour: "2-digit",
@@ -127,11 +209,12 @@ export const Chatbot = () => {
                 onKeyPress={handleKeyPress}
                 placeholder="메세지를 입력하세요."
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-transparent text-sm transition-all"
+                disabled={isLoading}
               />
               <button
                 onClick={handleSendMessage}
-                className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-lg focus:outline-none "
-                disabled={!inputText.trim()}
+                className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-lg focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!inputText.trim() || isLoading}
               >
                 <Send className="w-[20px]" />
               </button>
