@@ -47,7 +47,7 @@ export const BillCardList = ({
           {currentBills.map((bill) => (
             <BillCard
               key={bill.id}
-              category={bill.status}
+              category={bill.category}
               title={bill.title}
               date={bill.date}
               description={bill.summary}
