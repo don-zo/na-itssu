@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { ROUTES } from "@/routes/path";
+import LogoIcon from "@/assets/logo.svg";
 
 export const Header = () => {
   const location = useLocation();
@@ -13,7 +14,9 @@ export const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to={ROUTES.HOME} className="flex items-center">
-            <h1 className="text-2xl font-bold text-blue-700">국회잇슈</h1>
+          <img src={LogoIcon} alt="로고" className="w-10 h-10 mr-2" /> 
+            <h1 className="text-2xl font-bold">국회</h1>
+            <h1 className="text-2xl font-bold text-blue-700">잇슈</h1>
           </Link>
 
           <nav className="flex items-center space-x-8">

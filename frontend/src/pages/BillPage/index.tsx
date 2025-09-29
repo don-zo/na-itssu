@@ -105,6 +105,8 @@ export const BillPage = () => {
             </div>
           </div>
         )}
+      <div className="bg-gray-50 p-8">
+        <Chatbot />
       </div>
     </>
   );
