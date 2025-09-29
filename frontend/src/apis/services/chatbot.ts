@@ -44,6 +44,7 @@ export const chatbotService = {
 
       const decoder = new TextDecoder();
       let buffer = "";
+      let delay = 0; // 누적 지연 시간
 
       while (true) {
         const { done, value } = await reader.read();
@@ -74,7 +75,12 @@ export const chatbotService = {
 
             const processedData = data.replace(/\\n/g, "\n");
 
-            onMessage(processedData);
+            // 각 청크마다 순차적으로 지연 시간을 늘려서 실행
+            setTimeout(() => {
+              onMessage(processedData);
+            }, delay);
+
+            delay += 75;
           }
         }
       }

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/Header";
-import Chatbot from "@/components/chatbot";
+import Chatbot from "@/components/Chatbot";
 import { ROUTES } from "@/routes/path";
 import { ArrowLeft, Calendar, Building2, Users, Target, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 
@@ -70,7 +70,9 @@ export const BillDetailPage = () => {
   }, [billId]);
 
   const notFound = !bill;
-  const summaryHighlight = bill ? stripSquareBrackets(bill.summaryHighlight) : "";
+  const summaryHighlight = bill
+    ? stripSquareBrackets(bill.summaryHighlight)
+    : "";
 
   return (
     <>
@@ -78,28 +80,38 @@ export const BillDetailPage = () => {
       <div className="bg-gray-50 pt-20">
         <div className="text-center container mx-auto px-4 pt-5 pb-8">
           <div className="max-w-[960px] mx-auto text-left mb-4">
-          <Link
-            to={ROUTES.BILLS.DEFAULT}
-            className="inline-flex items-center gap-4 px-4 py-2 rounded-lg text-sm text-black hover:text-blue-700 hover:bg-blue-50 transition-colors duration-200"
-            aria-label="법률안 목록으로 돌아가기"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>목록으로 돌아가기</span>
-          </Link>
+            <Link
+              to={ROUTES.BILLS.DEFAULT}
+              className="inline-flex items-center gap-4 px-4 py-2 rounded-lg text-sm text-black hover:text-blue-700 hover:bg-blue-50 transition-colors duration-200"
+              aria-label="법률안 목록으로 돌아가기"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>목록으로 돌아가기</span>
+            </Link>
           </div>
-        {notFound ? (
-          <>
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">법률안을 찾을 수 없습니다</h1>
-            <p className="text-gray-600 mb-8">요청하신 법률안이 존재하지 않거나 잘못된 경로입니다.</p>
-          </>
-        ) : (
-          <>
-            <div className="max-w-[960px] mx-auto text-left mb-20">
+          {notFound ? (
+            <>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">
+                법률안을 찾을 수 없습니다
+              </h1>
+              <p className="text-gray-600 mb-8">
+                요청하신 법률안이 존재하지 않거나 잘못된 경로입니다.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="max-w-[960px] mx-auto text-left mb-20">
                 <div className="inline-flex items-center gap-3 mb-3">
-                    <p className="text-xs border border-gray-100 bg-gray-100 rounded-full px-2 py-[3px] font-semibold">{bill.tag}</p>
-                    <p className="text-xs border border-gray-200 rounded-full px-3 py-[3px] font-semibold">{bill.stage}</p>
+                  <p className="text-xs border border-gray-100 bg-gray-100 rounded-full px-2 py-[3px] font-semibold">
+                    {bill.tag}
+                  </p>
+                  <p className="text-xs border border-gray-200 rounded-full px-3 py-[3px] font-semibold">
+                    {bill.stage}
+                  </p>
                 </div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-7">{bill.billName}</h1>
+                <h1 className="text-3xl font-bold text-gray-800 mb-7">
+                  {bill.billName}
+                </h1>
                 <div className="flex justify-between gap-3 mb-8">
                     <div className="inline-flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-gray-500" />
@@ -230,5 +242,3 @@ export const BillDetailPage = () => {
 };
 
 export default BillDetailPage;
-
-
