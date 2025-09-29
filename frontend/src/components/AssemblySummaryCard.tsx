@@ -16,7 +16,6 @@ export interface AssemblySummaryCardProps {
     date: string;
     duration: string;
     agenda: AgendaItem[];
-    decision: DecisionItem[];
     summary: string;
 }
 
@@ -25,7 +24,6 @@ const AssemblySummaryCard: React.FC<AssemblySummaryCardProps> = ({
     date,
     duration,
     agenda,
-    decision,
     summary,
 }) => {
     return (
@@ -76,26 +74,12 @@ const AssemblySummaryCard: React.FC<AssemblySummaryCardProps> = ({
                         ))}
                     </ul>
                 </div>
-                <div className="flex-1">
-                    <h3 className="flex items-center font-semibold mb-3">
-                        주요 결정사항
+                <div className="flex-1 bg-blue-50 rounded-lg p-4">
+                    <h3 className="flex font-semibold mb-2">
+                        <FileText size={16} className="mr-2 mt-1" /> AI 요약
                     </h3>
-                    <ul className="list-disc list-inside space-y-2 text-gray-500 text-sm">
-                        {decision.map((item) => (
-                            <li key={item.id} className="flex items-start">
-                                <span className="w-2 h-2 mt-1.5 mr-2 rounded-full bg-blue-500"></span>
-                                <span className="text-gray-500">{item.text}</span>
-                            </li>
-                        ))}
-                    </ul>
+                    <p className="text-gray-500 text-sm leading-relaxed line-clamp-4">{summary}</p>
                 </div>
-            </div>
-
-            <div className="flex-1 bg-blue-50 rounded-lg p-4 mt-6">
-                <h3 className="flex font-semibold mb-2">
-                    <FileText size={16} className="mr-2 mt-1" /> AI 요약
-                </h3>
-                <p className="text-gray-500 text-sm leading-relaxed line-clamp-4">{summary}</p>
             </div>
         </div>
       );
