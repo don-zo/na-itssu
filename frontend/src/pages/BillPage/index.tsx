@@ -26,7 +26,7 @@ export const BillPage = () => {
       );
     }
 
-    // 정렬 로직 (백엔드 API 대비 확장 가능한 구조)
+    // 정렬 로직
     const sortedBills = [...bills].sort((a, b) => {
       switch (sortType) {
         case "latest":
@@ -73,7 +73,7 @@ export const BillPage = () => {
 
         {hasSearchResults ? (
           <>
-            <div className="relative max-w-[1200px] mx-auto mb-8">
+            <div className="relative max-w-[1120px] mx-auto mb-8">
               <div className="flex justify-end">
                 <FilterButtons
                   onSortChange={handleSortChange}

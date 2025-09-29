@@ -13,7 +13,7 @@ export const FilterButtons = ({
     <div className="flex items-center gap-2">
       <button
         onClick={() => onSortChange("latest")}
-        className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${
+        className={`px-4 py-2 text-sm font-medium rounded-full transition-all cursor-pointer ${
           currentSort === "latest"
             ? "bg-blue-500 text-white"
             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -23,7 +23,7 @@ export const FilterButtons = ({
       </button>
       <button
         onClick={() => onSortChange("votes")}
-        className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${
+        className={`px-4 py-2 text-sm font-medium rounded-full transition-all cursor-pointer ${
           currentSort === "votes"
             ? "bg-blue-500 text-white"
             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
