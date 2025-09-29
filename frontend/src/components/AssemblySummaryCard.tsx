@@ -194,7 +194,6 @@ const AssemblySummaryCard: React.FC<AssemblySummaryCardProps> = ({
         </div>
 
         <hr className="w-full border-t border-gray-300 my-6" />
-
         <div className="flex flex-col md:flex-row gap-6 ml-2 mr-2">
           <div className="flex-1">
             <h3 className="flex items-center font-semibold mb-3">
