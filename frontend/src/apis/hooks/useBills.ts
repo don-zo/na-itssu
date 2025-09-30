@@ -6,6 +6,7 @@ export const useBills = (params?: BillPageParams) => {
   return useQuery<BillPageResponse>({
     queryKey: ["bills", params],
     queryFn: () => billsService.getBillsPage(params),
+    enabled: params !== undefined,
     staleTime: 1000 * 60 * 5, // 5분
   });
 };
@@ -14,6 +15,7 @@ export const useBillsByVotes = (params?: BillPageParams) => {
   return useQuery<BillPageResponse>({
     queryKey: ["billsByVotes", params],
     queryFn: () => billsService.getBillsPageByVotes(params),
+    enabled: params !== undefined,
     staleTime: 1000 * 60 * 5,
   });
 };
