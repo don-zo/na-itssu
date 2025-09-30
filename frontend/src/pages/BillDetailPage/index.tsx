@@ -58,12 +58,16 @@ export const BillDetailPage = () => {
     fetchBill();
   }, [billId]);
 
-  // 로컬스토리지에서 투표 여부 동기화
+  // 서버 hasVoted가 있으면 우선 반영, 없으면 로컬스토리지로 보강
   useEffect(() => {
     if (!billId) return;
+    if (bill?.hasVoted) {
+      setHasVoted(true);
+      return;
+    }
     const status = getVoteStatus(billId);
     setHasVoted(status.voted);
-  }, [billId]);
+  }, [billId, bill?.hasVoted]);
 
   const handleVoteAgree = async () => {
     if (!billId || voting || hasVoted) return;

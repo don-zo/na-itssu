@@ -15,6 +15,8 @@ export interface BillCardProps {
   disagreeRate: number;
   width: string;
   isHot?: boolean;
+  // 서버에서 내려오는 투표 여부
+  initialHasVoted?: boolean;
   onAgreeClick?: () => void;
   onDisagreeClick?: () => void;
 }
@@ -30,6 +32,7 @@ const BillCard: React.FC<BillCardProps> = ({
   disagreeRate,
   width = "360px",
   isHot = false,
+  initialHasVoted,
   onAgreeClick,
   onDisagreeClick,
 }) => {
@@ -43,18 +46,22 @@ const BillCard: React.FC<BillCardProps> = ({
     Math.round((participants * disagreeRate) / 100)
   );
   const [showSnackbar, setShowSnackbar] = useState(false);
-  const [hasVoted, setHasVoted] = useState(false);
+  const [hasVoted, setHasVoted] = useState(!!initialHasVoted);
   const [voting, setVoting] = useState(false);
 
   // 기존 투표 여부 동기화 (로컬스토리지)
   useEffect(() => {
-    const status = getVoteStatus(id);
-    if (status.voted) {
-      // 이미 투표한 경우, 숫자를 로컬에서 증가시키지 않고 상태만 반영
+    // 서버 hasVoted가 true면 최우선 반영
+    if (initialHasVoted) {
+
       setHasVoted(true);
+      return;
     }
+    // 서버 정보 없을 때 로컬스토리지 확인
+    const status = getVoteStatus(id);
+    if (status.voted) setHasVoted(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, initialHasVoted]);
 
   const agreePercent = totalVotes
     ? ((agreeVotes / totalVotes) * 100).toFixed(1)

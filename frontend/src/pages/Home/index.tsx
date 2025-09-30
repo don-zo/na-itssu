@@ -77,6 +77,7 @@ export const Home = () => {
                         disagreeRate={disagreeRate}
                         width="630px"
                         isHot={true}
+                        initialHasVoted={firstBill.hasVoted}
                       />
                     );
                   })()
@@ -185,6 +186,7 @@ function TopBillsSection({ topBills, isLoading, isError }: { topBills: any[] | u
                   agreeRate={agreeRate}
                   disagreeRate={disagreeRate}
                   width="360px"
+                  initialHasVoted={item.hasVoted}
                 />
               );
             })}

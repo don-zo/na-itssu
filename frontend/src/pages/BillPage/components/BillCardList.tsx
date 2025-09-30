@@ -154,6 +154,7 @@ export const BillCardList = ({
                 agreeRate={agreeRate}
                 disagreeRate={disagreeRate}
                 width="360px"
+                initialHasVoted={bill.hasVoted}
                 onAgreeClick={() => voteAgreeMutate(bill.id)}
                 onDisagreeClick={() => voteDisagreeMutate(bill.id)}
               />
