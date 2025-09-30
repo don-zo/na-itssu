@@ -6,6 +6,7 @@ import { ROUTES } from "@/routes/path";
 import { ArrowLeft, Calendar, Building2, Users, Target, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { billsService } from "@/apis/services/bills";
 import type { BillTopVotesItem } from "@/apis/types/bills";
+import { getVoteStatus, setVoteStatus } from "@/utils/voteStorage";
 
 function parseMaybeJsonArray(value: string): string[] {
   try {
@@ -57,12 +58,20 @@ export const BillDetailPage = () => {
     fetchBill();
   }, [billId]);
 
+  // 로컬스토리지에서 투표 여부 동기화
+  useEffect(() => {
+    if (!billId) return;
+    const status = getVoteStatus(billId);
+    setHasVoted(status.voted);
+  }, [billId]);
+
   const handleVoteAgree = async () => {
     if (!billId || voting || hasVoted) return;
     
     try {
       setVoting(true);
       await billsService.voteAgree(billId);
+      setVoteStatus(billId, "agree");
       // 투표 후 데이터 다시 로드
       const updatedBill = await billsService.getBillById(billId);
       setBill(updatedBill);
@@ -83,6 +92,7 @@ export const BillDetailPage = () => {
     try {
       setVoting(true);
       await billsService.voteDisagree(billId);
+      setVoteStatus(billId, "disagree");
       // 투표 후 데이터 다시 로드
       const updatedBill = await billsService.getBillById(billId);
       setBill(updatedBill);
@@ -178,7 +188,7 @@ export const BillDetailPage = () => {
                 </div>
                 <div className="h-px bg-gray-200 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] mb-8"></div>
 
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-3 gap-6 overflow-visible">
                   <div className="col-span-2">
                     <div className="px-6 py-5 border border-gray-200 rounded-xl bg-white mb-6">
                       <h1 className="text-[22px] font-bold text-gray-800 mb-2">
@@ -275,7 +285,8 @@ export const BillDetailPage = () => {
                   </div>
 
                   <div className="col-span-1">
-                    <div className="px-6 py-5 border border-gray-200 rounded-xl bg-white mb-4 sticky top-24 h-fit">
+                    <div className="sticky top-24">
+                      <div className="px-6 py-5 border border-gray-200 rounded-xl bg-white mb-4 h-fit">
                       <h1 className="text-[22px] font-bold text-gray-800 mb-1">
                       시민 의견 투표
                       </h1>
@@ -343,17 +354,19 @@ export const BillDetailPage = () => {
                             {voting ? "투표 중..." : hasVoted ? "투표 완료" : "반대합니다"}
                           </span>
                         </button>
-                      </div>
-                    </div>
+                        </div>
 
-                    <a
-                      href={`https://search.naver.com/search.naver?query=${encodeURIComponent(bill.billName)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full px-6 py-3 border border-gray-200 text-[17px] rounded-xl bg-white font-semibold hover:bg-gray-50 text-center inline-block"
-                    >
-                      관련 내용 검색
-                    </a>
+                        </div>
+
+                        <a
+                          href={`https://search.naver.com/search.naver?query=${encodeURIComponent(bill.billName)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full px-6 py-3 border border-gray-200 text-[17px] rounded-xl bg-white font-semibold hover:bg-gray-50 text-center inline-block"
+                        >
+                          관련 내용 검색
+                        </a>
+                    </div>
                   </div>
 
                 
