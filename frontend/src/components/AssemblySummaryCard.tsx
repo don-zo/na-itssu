@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { CalendarDays, FileText, Play, Download, X, Send, ArrowRight } from "lucide-react";
+import { CalendarDays, FileText, Play, Download, X, Send, ArrowRight, MessageCircleMore } from "lucide-react";
 import { chatbotService } from "@/apis";
 
 export interface AssemblySummaryCardProps {
@@ -235,6 +235,7 @@ const AssemblySummaryCard: React.FC<AssemblySummaryCardProps> = ({
                 onClick={handleButtonClick}
                 className="flex items-center rounded-lg border border-gray-200 px-4 py-2 text-[15px] font-medium text-gray-700 hover:bg-gray-100"
               >
+                <MessageCircleMore className="h-4 w-4 mr-2 text-gray-700" />
                 {buttonText}
                 {onButtonClick && <ArrowRight className="h-4 w-4 ml-2 text-gray-700" />}
               </button>
