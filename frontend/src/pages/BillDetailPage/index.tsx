@@ -212,10 +212,22 @@ export const BillDetailPage = () => {
                           )
                         )}
                       </ul>
-                      
-                     <div className="flex items-center gap-2">
-                         <Target className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                         <p className="text-sm text-gray-500 leading-relaxed break-words max-w-xs">{summaryHighlight}</p>
+                    </div>
+
+                    <div className="px-6 py-5 border border-gray-200 rounded-xl bg-white mb-6">
+                      <h1 className="text-[22px] font-bold text-gray-800 mb-2">
+                        기대 효과
+                      </h1>
+                      <ul className="list-disc list-inside space-y-2 text-gray-500 text-sm">
+                        {parseMaybeJsonArray(bill.summaryEffect).map(
+                          (line, idx) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <span className="w-2 h-2 mt-1.5 mr-2 rounded-full bg-blue-500"></span>
+                              <span className="text-gray-600">{line}</span>
+                            </li>
+                          )
+                        )}
+                      </ul>
                     </div>
 
                     <div className="px-6 py-5 border border-gray-200 rounded-xl bg-white mb-6">
@@ -274,98 +286,61 @@ export const BillDetailPage = () => {
                       <div className="flex justify-between text-sm mb-3">
                         <span className="text-blue-600">
                           찬성{" "}
-                          {((bill.agreeCount / bill.totalCount) * 100).toFixed(
-                            1
-                          )}
-                          %
+                          {bill.totalCount > 0 ? ((bill.agreeCount / bill.totalCount) * 100).toFixed(1) : '0.0'}%
                         </span>
                         <span className="text-red-500">
                           반대{" "}
-                          {(
-                            (bill.disagreeCount / bill.totalCount) *
-                            100
-                          ).toFixed(1)}
-                          %
+                          {bill.totalCount > 0 ? ((bill.disagreeCount / bill.totalCount) * 100).toFixed(1) : '0.0'}%
                         </span>
                       </div>
                       <div className="w-full h-4 bg-gray-200 rounded-full flex overflow-hidden">
-                        <div
-                          className="bg-blue-500 h-4"
-                          style={{
-                            width: `${
-                              (bill.agreeCount / bill.totalCount) * 100
-                            }%`,
-                          }}
-                        ></div>
-                        <div
-                          className="bg-red-500 h-4"
-                          style={{
-                            width: `${
-                              (bill.disagreeCount / bill.totalCount) * 100
-                            }%`,
-                          }}
-                        ></div>
+                        {bill.totalCount > 0 ? (
+                          <>
+                            <div
+                              className="bg-blue-500 h-4"
+                              style={{ width: `${(bill.agreeCount / bill.totalCount) * 100}%` }}
+                            ></div>
+                            <div
+                              className="bg-red-500 h-4"
+                              style={{ width: `${(bill.disagreeCount / bill.totalCount) * 100}%` }}
+                            ></div>
+                          </>
+                        ) : (
+                          <div className="bg-gray-300 h-4 w-full"></div>
+                        )}
                       </div>
                     </div>
 
-                    <div className="col-span-1 px-6 py-5 border border-gray-200 rounded-xl bg-white mb-6 sticky top-24 h-fit">
-                        <h1 className="text-[22px] font-bold text-gray-800 mb-1">시민 의견 투표</h1>
-                        <p className="text-sm text-gray-500 mb-4">이 법률안에 대한 의견을 투표해주세요.</p>
+                    <p className="text-sm text-gray-500 mb-6 text-center">총 {bill.totalCount.toLocaleString()}명 참여</p>
 
-                        <div className="mb-4">
-                            <div className="flex justify-between text-sm mb-3">
-                                <span className="text-blue-600">찬성 {bill.totalCount > 0 ? ((bill.agreeCount / bill.totalCount) * 100).toFixed(1) : '0.0'}%</span>
-                                <span className="text-red-500">반대 {bill.totalCount > 0 ? ((bill.disagreeCount / bill.totalCount) * 100).toFixed(1) : '0.0'}%</span>
-                            </div>
-                            <div className="w-full h-4 bg-gray-200 rounded-full flex overflow-hidden">
-                                {bill.totalCount > 0 ? (
-                                    <>
-                                        <div
-                                            className="bg-blue-500 h-4"
-                                            style={{ width: `${(bill.agreeCount / bill.totalCount) * 100}%` }}
-                                        ></div>
-                                        <div
-                                            className="bg-red-500 h-4"
-                                            style={{ width: `${(bill.disagreeCount / bill.totalCount) * 100}%` }}
-                                        ></div>
-                                    </>
-                                ) : (
-                                    <div className="bg-gray-300 h-4 w-full"></div>
-                                )}
-                            </div>
-                        </div>
+                    <div className="border-t border-gray-200 mb-6"></div>
 
-                        <p className="text-sm text-gray-500 mb-6 text-center">총 {bill.totalCount.toLocaleString()}명 참여</p>
-
-                        <div className="border-t border-gray-200 mb-6"></div>
-
-                        <div className="mb-4 flex flex-col gap-3">
-                            <button 
-                                onClick={handleVoteAgree}
-                                disabled={voting || hasVoted}
-                                className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <ThumbsUp className="w-4 h-4 text-gray-700" />
-                                <span className="font-medium text-gray-700 text-sm">
-                                    {voting ? "투표 중..." : hasVoted ? "투표 완료" : "찬성합니다"}
-                                </span>
-                            </button>
-                            <button 
-                                onClick={handleVoteDisagree}
-                                disabled={voting || hasVoted}
-                                className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <ThumbsDown className="w-4 h-4 text-gray-700" />
-                                <span className="font-medium text-gray-700 text-sm">
-                                    {voting ? "투표 중..." : hasVoted ? "투표 완료" : "반대합니다"}
-                                </span>
-                            </button>
-                        </div>
+                    <div className="mb-4 flex flex-col gap-3">
+                      <button 
+                        onClick={handleVoteAgree}
+                        disabled={voting || hasVoted}
+                        className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ThumbsUp className="w-4 h-4 text-gray-700" />
+                        <span className="font-medium text-gray-700 text-sm">
+                          {voting ? "투표 중..." : hasVoted ? "투표 완료" : "찬성합니다"}
+                        </span>
+                      </button>
+                      <button 
+                        onClick={handleVoteDisagree}
+                        disabled={voting || hasVoted}
+                        className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ThumbsDown className="w-4 h-4 text-gray-700" />
+                        <span className="font-medium text-gray-700 text-sm">
+                          {voting ? "투표 중..." : hasVoted ? "투표 완료" : "반대합니다"}
+                        </span>
+                      </button>
                     </div>
                   </div>
                 </div>
-            </div>            
-          </>
+              </div>            
+            </>
           ) : null}
         </div>
       </div>
