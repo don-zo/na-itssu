@@ -17,3 +17,18 @@ export interface BillTopVotesItem {
   proposer: string;
 }
 
+export interface BillPageResponse {
+  size: number;
+  totalPages: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+  page: number;
+  content: BillTopVotesItem[];
+  totalElements: number;
+}
+
+export interface BillPageParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+}
