@@ -190,7 +190,7 @@ public class MeetingSummaryService {
     public Mono<MeetingAnalysisData> generateSummaryAndAnalysisFromPdf(String pdfUrl, String meetingTitle) {
         if (pdfUrl == null || pdfUrl.trim().isEmpty()) {
             log.warn("PDF URL이 비어있어 분석 생성 불가: {}", meetingTitle);
-            return Mono.just(new MeetingAnalysisData("", "[]"));
+            return Mono.just(new MeetingAnalysisData("", "", "[]"));
         }
 
         log.info("회의 PDF 요약 및 구조화된 분석 생성 시작: {} - {}", meetingTitle, pdfUrl);
@@ -202,7 +202,7 @@ public class MeetingSummaryService {
                 .flatMap(pdfData -> documentParserService.parseDocumentToText(pdfData, filename))
                 .filter(text -> !text.trim().isEmpty())
                 .flatMap(parsedText -> {
-                    // 요약과 구조화된 분석을 병렬로 실행
+                    // 줄글 요약과 구조화된 분석을 병렬로 실행
                     Mono<String> summaryMono = generateSummaryWithSolar(parsedText, meetingTitle);
                     Mono<MeetingAnalysisResult> analysisMono = structuredMeetingAnalysisService.analyzeWithStructuredOutput(parsedText, meetingTitle);
 
@@ -215,10 +215,10 @@ public class MeetingSummaryService {
                                     String discussionJson = analysis.getDiscussionItems() != null ? 
                                             objectMapper.writeValueAsString(analysis.getDiscussionItems()) : "[]";
                                     
-                                    return new MeetingAnalysisData(summary, discussionJson);
+                                    return new MeetingAnalysisData(summary, "", discussionJson); // 일반 요약은 빈 문자열
                                 } catch (Exception e) {
                                     log.error("JSON 변환 실패: {}", e.getMessage());
-                                    return new MeetingAnalysisData(summary, "[]");
+                                    return new MeetingAnalysisData(summary, "", "[]");
                                 }
                             });
                 })
@@ -230,20 +230,23 @@ public class MeetingSummaryService {
                     }
                 })
                 .doOnError(error -> log.error("회의 PDF 요약 및 분석 생성 실패: {} - {}", meetingTitle, error.getMessage()))
-                .onErrorReturn(new MeetingAnalysisData("", "[]")); // 오류 시 빈 데이터 반환
+                .onErrorReturn(new MeetingAnalysisData("", "", "[]")); // 오류 시 빈 데이터 반환
     }
 
     // 분석 결과를 담는 데이터 클래스
     public static class MeetingAnalysisData {
         private final String summary;
+        private final String generalSummary;
         private final String discussionItemsJson;
 
-        public MeetingAnalysisData(String summary, String discussionItemsJson) {
+        public MeetingAnalysisData(String summary, String generalSummary, String discussionItemsJson) {
             this.summary = summary;
+            this.generalSummary = generalSummary;
             this.discussionItemsJson = discussionItemsJson;
         }
 
         public String getSummary() { return summary; }
+        public String getGeneralSummary() { return generalSummary; }
         public String getDiscussionItemsJson() { return discussionItemsJson; }
     }
 }
