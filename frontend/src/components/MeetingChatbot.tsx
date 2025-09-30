@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { MessageCircleMore } from "lucide-react";
 
 interface MeetingChatbotProps {

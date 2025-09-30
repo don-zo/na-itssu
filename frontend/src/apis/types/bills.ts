@@ -32,4 +32,5 @@ export interface BillPageParams {
   page?: number;
   size?: number;
   sort?: string;
+  tag?: string;
 }

@@ -4,12 +4,14 @@ import type { SortType } from "@/pages/BillPage/components/FilterButtons";
 import type { BillTopVotesItem } from "@/apis/types/bills";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { billsService } from "@/apis/services/bills";
+import type { TagType } from "@/pages/BillPage/components/TagButtons";
 
 interface BillCardListProps {
   currentPage: number;
   itemsPerPage: number;
   searchQuery?: string;
   sortType?: SortType;
+  currentTag?: TagType;
 }
 
 export const BillCardList = ({
@@ -17,14 +19,41 @@ export const BillCardList = ({
   itemsPerPage,
   searchQuery = "",
   sortType = "latest",
+  currentTag = "all",
 }: BillCardListProps) => {
   const queryClient = useQueryClient();
 
   // API 파라미터 구성
-  const apiParams = {
-    page: currentPage - 1, // API는 0부터 시작
-    size: itemsPerPage,
-  };
+  const apiParams = (() => {
+    const mapTagToKorean = (tag: TagType): string | undefined => {
+      switch (tag) {
+        case "transport":
+          return "교통";
+        case "housing":
+          return "주거";
+        case "economy":
+          return "경제";
+        case "environment":
+          return "환경";
+        case "employment":
+          return "고용";
+        case "other":
+          return "기타";
+        case "all":
+        default:
+          return undefined;
+      }
+    };
+
+    const tagParam = mapTagToKorean(currentTag);
+    const sortParam = sortType === "votes" ? "votes" : "latest";
+    return {
+      page: currentPage - 1, // API는 0부터 시작
+      size: itemsPerPage,
+      sort: sortParam,
+      ...(tagParam ? { tag: tagParam } : {}),
+    } as const;
+  })();
 
   // 검색어가 있으면 검색 API 사용
   const {
@@ -33,31 +62,33 @@ export const BillCardList = ({
     error: errorSearch,
   } = useBillSearch(searchQuery || undefined, apiParams.page);
 
-  // 정렬 타입에 따른 일반/투표순 목록 호출 (검색어 없을 때만)
-  const { data: billsDataLatest, isLoading: isLoadingLatest, error: errorLatest } = useBills(
-    !searchQuery && sortType === "latest" ? { ...apiParams, sort: "proposeDate,desc" } : undefined
-  );
+  // 정렬/태그 조합에 따른 엔드포인트 선택 (검색어 없을 때만)
+  const useVotesEndpoint = !searchQuery && sortType === "votes" && currentTag === "all";
+
+  const { data: billsDataLatestOrTagged, isLoading: isLoadingLatestOrTagged, error: errorLatestOrTagged } =
+    useBills(!searchQuery && !useVotesEndpoint ? apiParams : undefined);
+
   const { data: billsDataByVotes, isLoading: isLoadingVotes, error: errorVotes } = useBillsByVotes(
-    !searchQuery && sortType === "votes" ? apiParams : undefined
+    !searchQuery && useVotesEndpoint ? { page: apiParams.page, size: apiParams.size } : undefined
   );
 
   const billsData = searchQuery
     ? searchData
-    : sortType === "latest"
-    ? billsDataLatest
-    : billsDataByVotes;
+    : useVotesEndpoint
+    ? billsDataByVotes
+    : billsDataLatestOrTagged;
 
   const isLoading = searchQuery
     ? isLoadingSearch
-    : sortType === "latest"
-    ? isLoadingLatest
-    : isLoadingVotes;
+    : useVotesEndpoint
+    ? isLoadingVotes
+    : isLoadingLatestOrTagged;
 
   const error = searchQuery
     ? errorSearch
-    : sortType === "latest"
-    ? errorLatest
-    : errorVotes;
+    : useVotesEndpoint
+    ? errorVotes
+    : errorLatestOrTagged;
 
   // 찬성/반대 투표 mutation
   const { mutate: voteAgreeMutate } = useMutation({

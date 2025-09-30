@@ -53,6 +53,7 @@ const BillCard: React.FC<BillCardProps> = ({
   useEffect(() => {
     // 서버 hasVoted가 true면 최우선 반영
     if (initialHasVoted) {
+
       setHasVoted(true);
       return;
     }
