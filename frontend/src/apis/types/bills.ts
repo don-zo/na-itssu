@@ -7,6 +7,7 @@ export interface BillTopVotesItem {
   totalCount: number;
   agreeCount: number;
   disagreeCount: number;
+  hasVoted: boolean;
   summaryContent: string;
   summaryBackground: string;
   summaryHighlight: string;
