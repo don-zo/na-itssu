@@ -91,12 +91,12 @@ export const Home = () => {
         <div className="flex justify-center items-center">
           <Clock className="text-blue-600 h-6 w-6 mr-2" />
           <span className="inline-flex px-3 py-1 bg-blue-600 text-white rounded-full text-[15px] font-medium">
-            오늘의 국회
+            최근 국회
           </span>
         </div>
-        <h1 className="text-[30px] font-bold mt-3">오늘자 국회 회의 요약</h1>
+        <h1 className="text-[30px] font-bold mt-3">최신 국회 회의 요약</h1>
         <span className="text-[17px] text-gray-500 mt-1 mb-8">
-          AI가 분석한 오늘의 국회 활동을 확인해보세요!
+          AI가 분석한 최신 국회 활동을 확인해보세요!
         </span>
         {isMeetingLoading && (
           <div className="text-center">
