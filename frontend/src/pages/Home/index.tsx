@@ -10,6 +10,10 @@ import { billsService } from "@/apis";
 
 export const Home = () => {
   const navigate = useNavigate();
+  const { data: topBills, isLoading, isError } = useQuery({
+    queryKey: ["bills", "top", 4],
+    queryFn: () => billsService.getTopNByVotes(4),
+  });
 
   function handleClick() {
     navigate(ROUTES.BILLS.DEFAULT)
@@ -42,17 +46,33 @@ export const Home = () => {
                     🔥 HOT
                   </span>
                 </div>
-                <BillCard
-                  category="환경"
-                  title="탄소 중립 기본법"
-                  date="2025.09.01"
-                  description="2050 탄소중립 달성을 위한 기업 탄소배출 의무신고제, 친환경 에너지 전환 지원, 일회용품 사용 제한 강화 등 환경보호를 위한 종합 법안입니다."
-                  participants={19250}
-                  agreeRate={70.2}
-                  disagreeRate={29.8}
-                  width="630px"
-                  isHot={true}
-                />
+                {isLoading && (
+                  <span className="text-white/80">불러오는 중...</span>
+                )}
+                {isError && (
+                  <span className="text-red-100">데이터를 불러오지 못했습니다.</span>
+                )}
+                {!isLoading && !isError && topBills && topBills.length > 0 && (
+                  (() => {
+                    const firstBill = topBills[0];
+                    const total = firstBill.totalCount ?? (firstBill.agreeCount + firstBill.disagreeCount);
+                    const agreeRate = total > 0 ? (firstBill.agreeCount / total) * 100 : 0;
+                    const disagreeRate = total > 0 ? (firstBill.disagreeCount / total) * 100 : 0;
+                    return (
+                      <BillCard
+                        category={firstBill.tag || "기타"}
+                        title={firstBill.billName}
+                        date={firstBill.proposeDate.replaceAll("-", ".")}
+                        description={firstBill.summaryLine || firstBill.summaryContent || ""}
+                        participants={total}
+                        agreeRate={agreeRate}
+                        disagreeRate={disagreeRate}
+                        width="630px"
+                        isHot={true}
+                      />
+                    );
+                  })()
+                )}
               </div>
             </div>
           </div>
@@ -91,7 +111,7 @@ export const Home = () => {
         </div>
         <h1 className="text-[30px] font-bold mt-3">투표율이 높은 법률안</h1>
         <span className="text-[17px] text-gray-500 mt-1 mb-8">시민들의 관심이 많은 법률안에 참여해보세요!</span>
-        <TopBillsSection />
+        <TopBillsSection topBills={topBills} isLoading={isLoading} isError={isError} />
       </div>
       <div className="flex justify-center mt-8 mb-15">
         <button onClick={handleClick}
@@ -107,11 +127,9 @@ export const Home = () => {
 
 export default Home;
 
-function TopBillsSection() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["bills", "top", 3],
-    queryFn: () => billsService.getTopNByVotes(3),
-  });
+function TopBillsSection({ topBills, isLoading, isError }: { topBills: any[] | undefined, isLoading: boolean, isError: boolean }) {
+  // 첫 번째 카드는 HOT 섹션에서 사용하므로 나머지 3개만 사용
+  const remainingBills = topBills ? topBills.slice(1, 4) : [];
   
   return (
     <>
@@ -121,9 +139,9 @@ function TopBillsSection() {
       {isError && (
         <span className="text-red-100">데이터를 불러오지 못했습니다.</span>
       )}
-      {!isLoading && !isError && data && data.length > 0 && (
+      {!isLoading && !isError && remainingBills && remainingBills.length > 0 && (
         <div className="flex gap-4 w-full justify-center items-center">
-          {data.map((item: any) => {
+          {remainingBills.map((item: any) => {
             const total = item.totalCount ?? (item.agreeCount + item.disagreeCount);
             const agreeRate = total > 0 ? (item.agreeCount / total) * 100 : 0;
             const disagreeRate = total > 0 ? (item.disagreeCount / total) * 100 : 0;
