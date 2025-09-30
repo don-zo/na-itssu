@@ -292,6 +292,20 @@ public class BillService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<Bill> getBillsByTagAndSort(String tag, String sort, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        String normalized = (tag == null || tag.isBlank() || tag.trim().equals("전체")) ? null : tag.trim();
+        if (sort == null || sort.isBlank() || sort.equalsIgnoreCase("latest")) {
+            return billRepository.findByTagOrderByLatest(normalized, pageable);
+        }
+        if (sort.equalsIgnoreCase("votes")) {
+            return billRepository.findByTagOrderByVotesDesc(normalized, pageable);
+        }
+        // 알 수 없는 정렬 키면 최신순 기본
+        return billRepository.findByTagOrderByLatest(normalized, pageable);
+    }
+
+    @Transactional(readOnly = true)
     public java.util.Optional<Bill> getTopBillByVotes() {
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1);
         org.springframework.data.domain.Page<Bill> page = billRepository.findAllOrderByVotesDesc(pageable);

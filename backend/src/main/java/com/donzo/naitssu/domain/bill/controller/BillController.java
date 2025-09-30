@@ -67,10 +67,17 @@ public class BillController {
 
     @GetMapping("/page")
     public ResponseEntity<java.util.Map<String, Object>> getBillsByPage(
-            @RequestParam(defaultValue = "0") int page) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String tag,
+            @RequestParam(defaultValue = "latest") String sort) {
         try {
             int size = 9;
-            org.springframework.data.domain.Page<Bill> result = billService.getBillsPage(page, size);
+            org.springframework.data.domain.Page<Bill> result;
+            if (tag == null && (sort == null || sort.isBlank() || sort.equalsIgnoreCase("latest"))) {
+                result = billService.getBillsPage(page, size);
+            } else {
+                result = billService.getBillsByTagAndSort(tag, sort, page, size);
+            }
             java.util.Map<String, Object> body = new java.util.HashMap<>();
             List<Map<String, Object>> content = result.getContent().stream()
                 .map(b -> toBillWithVotes(b, voteRepository.findById(b.getId()).orElse(null)))
