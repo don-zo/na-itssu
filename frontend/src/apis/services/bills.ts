@@ -25,7 +25,6 @@ export const billsService = {
   async voteDisagree(id: number): Promise<void> {
     await apiClient.post(`${BILLS_ENDPOINTS.BILLS}/${id}/votes/disagree?n=1`);
   },
-};
 
   async getBillsPage(params?: BillPageParams): Promise<BillPageResponse> {
     const res = await apiClient.get<BillPageResponse>(
