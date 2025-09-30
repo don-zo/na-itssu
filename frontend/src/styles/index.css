@@ -1,4 +1,18 @@
 @import "tailwindcss";
+
+/* MapoAemin 폰트 추가 */
+@font-face {
+    font-family: 'MapoAemin';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/MapoAgapeA.woff') format('woff');
+    font-weight: normal;
+    font-display: swap;
+}
+
+/* 특정 텍스트에만 적용되는 커스텀 클래스 */
+.mapo-title {
+    font-family: 'MapoAemin', sans-serif;
+}
+
 @theme {
   --animate-marquee-left: marquee-left 20s linear infinite;
 }
