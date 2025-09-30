@@ -7,6 +7,7 @@ import { TrendingUp, Clock, ArrowRight } from "lucide-react";
 import { ROUTES } from "@/routes/path";
 import { useQuery } from "@tanstack/react-query";
 import { billsService } from "@/apis";
+import { useLatestMeeting } from "@/apis/hooks/useMeetings";
 
 export const Home = () => {
   const navigate = useNavigate();
@@ -15,8 +16,14 @@ export const Home = () => {
     queryFn: () => billsService.getTopNByVotes(4),
   });
 
+  const { data: latestMeeting, isLoading: isMeetingLoading, isError: isMeetingError } = useLatestMeeting();
+
   function handleClick() {
     navigate(ROUTES.BILLS.DEFAULT)
+  }
+
+  function handleConferenceClick() {
+    navigate(ROUTES.CONFERENCE.DEFAULT)
   }
 
   return (
@@ -78,8 +85,6 @@ export const Home = () => {
             </div>
           </div>
         </section>
-
-        <Chatbot />
       </div>
       <div className="flex flex-col items-center justify-center mt-15">
         <div className="flex justify-center items-center">
@@ -92,16 +97,32 @@ export const Home = () => {
         <span className="text-[17px] text-gray-500 mt-1 mb-8">
           AI가 분석한 오늘의 국회 활동을 확인해보세요!
         </span>
-        <AssemblySummaryCard
-          title="제21대 국회 제3차 본회의"
-          date="2025.09.20"
-          summary="이번 본회의에서는 기후 변화 대응을 위한 탄소중립 기본법 개정안이 찬성 다수로 가결되었으며, 청년 주거 안정 지원책을 위한 예산 증액안 또한 통과되었습니다. 또한 미래 사회 대비를 위해 디지털 교육 인프라 구축을 전담할 특별위원회를 신설하기로 결정했습니다. 전반적으로 기후·청년·디지털을 중심으로 하는 사회적 의제가 강조된 회의였습니다."
-          discussion_items={[
-            "탄소중립 기본법 개정안 논의",
-            "청년 주거 지원 정책 보고",
-            "디지털 전환을 위한 교육 인프라 확대",
-          ]}
-        />
+        {isMeetingLoading && (
+          <div className="text-center">
+            <span className="text-gray-500">회의 정보를 불러오는 중...</span>
+          </div>
+        )}
+        {isMeetingError && (
+          <div className="text-center">
+            <span className="text-red-500">회의 정보를 불러오지 못했습니다.</span>
+          </div>
+        )}
+        {!isMeetingLoading && !isMeetingError && latestMeeting && (
+          <AssemblySummaryCard
+            title={latestMeeting.title}
+            date={latestMeeting.conf_date.replaceAll("-", ".")}
+            summary={latestMeeting.summary}
+            discussion_items={latestMeeting.discussion_items}
+            buttonText="더 많은 회의요약 보기"
+            onButtonClick={handleConferenceClick}
+            showChatButton={true}
+          />
+        )}
+        {!isMeetingLoading && !isMeetingError && !latestMeeting && (
+          <div className="text-center">
+            <span className="text-gray-500">최신 회의 정보가 없습니다.</span>
+          </div>
+        )}
       </div>
       <div className="flex flex-col items-center justify-center mt-15">
         <div className="flex justify-center items-center">
@@ -122,6 +143,7 @@ export const Home = () => {
             <ArrowRight className="h-4 w-4 ml-3 text-gray-700" />
         </button>
       </div>
+      <Chatbot />
     </>
   );
 };

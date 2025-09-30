@@ -16,4 +16,5 @@ export const BILLS_ENDPOINTS = {
 
 export const MEETINGS_ENDPOINTS = {
   GET_MEETINGS: "/api/meetings",
+  GET_LATEST_MEETING: "/api/meetings/latest",
 };

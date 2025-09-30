@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { CalendarDays, FileText, Play, Download, X, Send } from "lucide-react";
+import { CalendarDays, FileText, Play, Download, X, Send, ArrowRight } from "lucide-react";
 import { chatbotService } from "@/apis";
 
 export interface AssemblySummaryCardProps {
@@ -10,6 +10,10 @@ export interface AssemblySummaryCardProps {
   pdfLinkUrl?: string;
   vodLinkUrl?: string;
   conferenceId?: number;
+  // 새로운 props 추가
+  buttonText?: string;
+  onButtonClick?: () => void;
+  showChatButton?: boolean;
 }
 
 interface Message {
@@ -27,6 +31,9 @@ const AssemblySummaryCard: React.FC<AssemblySummaryCardProps> = ({
   pdfLinkUrl,
   vodLinkUrl,
   conferenceId,
+  buttonText = "AI에게 물어보기",
+  onButtonClick,
+  showChatButton = true,
 }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -149,6 +156,14 @@ const AssemblySummaryCard: React.FC<AssemblySummaryCardProps> = ({
     }
   };
 
+  const handleButtonClick = () => {
+    if (onButtonClick) {
+      onButtonClick();
+    } else {
+      setIsChatOpen(!isChatOpen);
+    }
+  };
+
   const renderTextWithLineBreaks = (text: string) => {
     return text.split("\n").map((line, index) => (
       <span key={index}>
@@ -215,12 +230,15 @@ const AssemblySummaryCard: React.FC<AssemblySummaryCardProps> = ({
             <h3 className="flex font-semibold">
               <FileText size={16} className="mr-2 mt-1" /> AI 요약
             </h3>
-            <button
-              onClick={() => setIsChatOpen(!isChatOpen)}
-              className="flex items-center rounded-lg border border-gray-200 px-4 py-2 text-[15px] font-medium text-gray-700 hover:bg-gray-100"
-            >
-              AI에게 물어보기
-            </button>
+            {showChatButton && (
+              <button
+                onClick={handleButtonClick}
+                className="flex items-center rounded-lg border border-gray-200 px-4 py-2 text-[15px] font-medium text-gray-700 hover:bg-gray-100"
+              >
+                {buttonText}
+                {onButtonClick && <ArrowRight className="h-4 w-4 ml-2 text-gray-700" />}
+              </button>
+            )}
           </div>
           <div className="bg-blue-50 rounded-lg p-4">
             <p className="text-gray-500 text-sm leading-relaxed line-clamp-4">
@@ -230,85 +248,87 @@ const AssemblySummaryCard: React.FC<AssemblySummaryCardProps> = ({
         </div>
       </div>
 
-      {/* 오른쪽 채팅창 */}
-      <div
-        className={`transition-all duration-200 ease-in-out overflow-hidden ${
-          isChatOpen ? "w-80 opacity-100" : "w-0 opacity-0"
-        }`}
-      >
-        {isChatOpen && (
-          <div className="w-80 h-[600px] bg-white rounded-lg shadow-md border border-gray-200 flex flex-col">
-            <div className="text-white p-2 rounded-t-lg flex justify-between items-center">
-              <h2 className="font-semibold">{}</h2>
-              <button
-                onClick={() => setIsChatOpen(false)}
-                className="text-gray-400 rounded-full p-1 hover:bg-gray-200 focus:outline-none"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* 메시지 영역 */}
-            <div
-              ref={chatContainerRef}
-              className="flex-1 overflow-y-auto p-3 space-y-3"
-            >
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.isUser ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-xs px-3 py-2 rounded-lg ${
-                      message.isUser
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    <p className="text-sm">
-                      {renderTextWithLineBreaks(message.text)}
-                      {streamingMessageId === message.id && (
-                        <span className="inline-block w-2 h-4 bg-gray-400 ml-1 animate-pulse"></span>
-                      )}
-                    </p>
-                    <p className="text-xs opacity-70 mt-1">
-                      {message.timestamp.toLocaleTimeString("ko-KR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* 입력 영역 */}
-            <div className="p-3 border-t border-gray-200">
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="회의에 대해 궁금한 점을 질문하세요."
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-transparent text-sm transition-all"
-                  disabled={isLoading}
-                />
+      {/* 오른쪽 채팅창 - showChatButton이 true이고 onButtonClick이 없을 때만 표시 */}
+      {showChatButton && !onButtonClick && (
+        <div
+          className={`transition-all duration-200 ease-in-out overflow-hidden ${
+            isChatOpen ? "w-80 opacity-100" : "w-0 opacity-0"
+          }`}
+        >
+          {isChatOpen && (
+            <div className="w-80 h-[600px] bg-white rounded-lg shadow-md border border-gray-200 flex flex-col">
+              <div className="text-white p-2 rounded-t-lg flex justify-between items-center">
+                <h2 className="font-semibold">{}</h2>
                 <button
-                  onClick={handleSendMessage}
-                  className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-lg focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={!inputText.trim() || isLoading}
+                  onClick={() => setIsChatOpen(false)}
+                  className="text-gray-400 rounded-full p-1 hover:bg-gray-200 focus:outline-none"
                 >
-                  <Send className="w-[20px]" />
+                  <X size={20} />
                 </button>
               </div>
+
+              {/* 메시지 영역 */}
+              <div
+                ref={chatContainerRef}
+                className="flex-1 overflow-y-auto p-3 space-y-3"
+              >
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${
+                      message.isUser ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`max-w-xs px-3 py-2 rounded-lg ${
+                        message.isUser
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      <p className="text-sm">
+                        {renderTextWithLineBreaks(message.text)}
+                        {streamingMessageId === message.id && (
+                          <span className="inline-block w-2 h-4 bg-gray-400 ml-1 animate-pulse"></span>
+                        )}
+                      </p>
+                      <p className="text-xs opacity-70 mt-1">
+                        {message.timestamp.toLocaleTimeString("ko-KR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* 입력 영역 */}
+              <div className="p-3 border-t border-gray-200">
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="회의에 대해 궁금한 점을 질문하세요."
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-transparent text-sm transition-all"
+                    disabled={isLoading}
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    className="bg-blue-500 hover:bg-blue-700 text-white px-3 py-2 rounded-lg focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!inputText.trim() || isLoading}
+                  >
+                    <Send className="w-[20px]" />
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -3,6 +3,9 @@ export { chatbotService } from "./services/chatbot";
 export { meetingsService } from "./services/meetings";
 export { billsService } from "@/apis/services/bills";
 
+// Hooks
+export { useMeetings, useLatestMeeting } from "./hooks/useMeetings";
+
 // Types
 export type {
   CreateSessionResponse,
