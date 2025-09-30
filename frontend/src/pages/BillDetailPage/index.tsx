@@ -31,6 +31,8 @@ export const BillDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [voting, setVoting] = useState(false);
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
     const fetchBill = async () => {
@@ -57,7 +59,7 @@ export const BillDetailPage = () => {
   }, [billId]);
 
   const handleVoteAgree = async () => {
-    if (!billId || voting) return;
+    if (!billId || voting || hasVoted) return;
     
     try {
       setVoting(true);
@@ -65,6 +67,9 @@ export const BillDetailPage = () => {
       // 투표 후 데이터 다시 로드
       const updatedBill = await billsService.getBillById(billId);
       setBill(updatedBill);
+      setHasVoted(true);
+      setShowSnackbar(true);
+      setTimeout(() => setShowSnackbar(false), 2000);
     } catch (err) {
       console.error("찬성 투표 실패:", err);
       alert("투표에 실패했습니다. 다시 시도해주세요.");
@@ -74,7 +79,7 @@ export const BillDetailPage = () => {
   };
 
   const handleVoteDisagree = async () => {
-    if (!billId || voting) return;
+    if (!billId || voting || hasVoted) return;
     
     try {
       setVoting(true);
@@ -82,6 +87,9 @@ export const BillDetailPage = () => {
       // 투표 후 데이터 다시 로드
       const updatedBill = await billsService.getBillById(billId);
       setBill(updatedBill);
+      setHasVoted(true);
+      setShowSnackbar(true);
+      setTimeout(() => setShowSnackbar(false), 2000);
     } catch (err) {
       console.error("반대 투표 실패:", err);
       alert("투표에 실패했습니다. 다시 시도해주세요.");
@@ -265,22 +273,22 @@ export const BillDetailPage = () => {
                         <div className="mb-4 flex flex-col gap-3">
                             <button 
                                 onClick={handleVoteAgree}
-                                disabled={voting}
+                                disabled={voting || hasVoted}
                                 className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <ThumbsUp className="w-4 h-4 text-gray-700" />
                                 <span className="font-medium text-gray-700 text-sm">
-                                    {voting ? "투표 중..." : "찬성합니다"}
+                                    {voting ? "투표 중..." : hasVoted ? "투표 완료" : "찬성합니다"}
                                 </span>
                             </button>
                             <button 
                                 onClick={handleVoteDisagree}
-                                disabled={voting}
+                                disabled={voting || hasVoted}
                                 className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <ThumbsDown className="w-4 h-4 text-gray-700" />
                                 <span className="font-medium text-gray-700 text-sm">
-                                    {voting ? "투표 중..." : "반대합니다"}
+                                    {voting ? "투표 중..." : hasVoted ? "투표 완료" : "반대합니다"}
                                 </span>
                             </button>
                         </div>
@@ -294,6 +302,12 @@ export const BillDetailPage = () => {
       <div className="bg-gray-50 p-8">
         <Chatbot />
       </div>
+      
+      {showSnackbar && (
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg transition transform animate-bounce z-50">
+          투표가 반영되었습니다!
+        </div>
+      )}
     </>
   );
 };
