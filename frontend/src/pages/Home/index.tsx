@@ -130,7 +130,10 @@ export default Home;
 function TopBillsSection({ topBills, isLoading, isError }: { topBills: any[] | undefined, isLoading: boolean, isError: boolean }) {
   // 첫 번째 카드는 HOT 섹션에서 사용하므로 나머지 3개만 사용
   const remainingBills = topBills ? topBills.slice(1, 4) : [];
-  
+
+  // 무한 루프를 위해 동일한 배열을 두 번 이어 붙임
+  const marqueeItems = [...remainingBills, ...remainingBills];
+
   return (
     <>
       {isLoading && (
@@ -140,25 +143,30 @@ function TopBillsSection({ topBills, isLoading, isError }: { topBills: any[] | u
         <span className="text-red-100">데이터를 불러오지 못했습니다.</span>
       )}
       {!isLoading && !isError && remainingBills && remainingBills.length > 0 && (
-        <div className="flex gap-4 w-full justify-center items-center">
-          {remainingBills.map((item: any) => {
-            const total = item.totalCount ?? (item.agreeCount + item.disagreeCount);
-            const agreeRate = total > 0 ? (item.agreeCount / total) * 100 : 0;
-            const disagreeRate = total > 0 ? (item.disagreeCount / total) * 100 : 0;
-            return (
-              <BillCard
-                key={item.id}
-                category={item.tag || "기타"}
-                title={item.billName}
-                date={item.proposeDate.replaceAll("-", ".")}
-                description={item.summaryLine || item.summaryContent || ""}
-                participants={total}
-                agreeRate={agreeRate}
-                disagreeRate={disagreeRate}
-                width="360px"
-              />
-            );
-          })}
+        <div className="marquee-container">
+          <div className="marquee-track">
+            {marqueeItems.map((item: any, index: number) => {
+              const total = item.totalCount ?? (item.agreeCount + item.disagreeCount);
+              const agreeRate = total > 0 ? (item.agreeCount / total) * 100 : 0;
+              const disagreeRate = total > 0 ? (item.disagreeCount / total) * 100 : 0;
+              const key = `${item.id}-${index}`;
+              return (
+                <BillCard
+                  key={key}
+                  category={item.tag || "기타"}
+                  title={item.billName}
+                  date={item.proposeDate.replaceAll("-", ".")}
+                  description={item.summaryLine || item.summaryContent || ""}
+                  participants={total}
+                  agreeRate={agreeRate}
+                  disagreeRate={disagreeRate}
+                  width="360px"
+                />
+              );
+            })}
+          </div>
+          <div className="marquee-fade-left" />
+          <div className="marquee-fade-right" />
         </div>
       )}
     </>

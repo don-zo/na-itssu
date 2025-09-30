@@ -1,1 +1,52 @@
 @import "tailwindcss";
+@theme {
+  --animate-marquee-left: marquee-left 20s linear infinite;
+}
+
+@keyframes marquee-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* 마키 컨테이너/트랙 유틸 */
+.marquee-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.marquee-track {
+  display: flex;
+  gap: 1rem; /* tailwind gap-4 대응 */
+  width: max-content;
+  will-change: transform;
+  animation: var(--animate-marquee-left);
+}
+
+/* 카드 위에 마우스를 올리면 살짝 멈춤 (일시 정지) */
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.marquee-fade-left,
+.marquee-fade-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 25%;
+  pointer-events: none;
+}
+
+.marquee-fade-left {
+  left: 0;
+  background: linear-gradient(to right, var(--color-background), transparent);
+}
+
+.marquee-fade-right {
+  right: 0;
+  background: linear-gradient(to left, var(--color-background), transparent);
+}
