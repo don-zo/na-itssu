@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Calendar, Users, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getVoteStatus, setVoteStatus } from "@/utils/voteStorage";
 
 export interface BillCardProps {
   id: number;
@@ -43,6 +44,21 @@ const BillCard: React.FC<BillCardProps> = ({
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
 
+  // 기존 투표 여부 동기화 (로컬스토리지)
+  useEffect(() => {
+    const status = getVoteStatus(id);
+    if (status.voted) {
+      if (status.choice === "agree") {
+        setAgreeVotes((v) => v + 1);
+      } else if (status.choice === "disagree") {
+        setDisagreeVotes((v) => v + 1);
+      }
+      setTotalVotes((v) => v + 1);
+      setHasVoted(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
   const agreePercent = totalVotes
     ? ((agreeVotes / totalVotes) * 100).toFixed(1)
     : "0.0";
@@ -56,6 +72,9 @@ const BillCard: React.FC<BillCardProps> = ({
     setTotalVotes(totalVotes + 1);
     setHasVoted(true);
 
+    // 퍼시스트
+    setVoteStatus(id, "agree");
+
     if (onAgreeClick) onAgreeClick();
 
     setShowSnackbar(true);
@@ -67,6 +86,9 @@ const BillCard: React.FC<BillCardProps> = ({
     setDisagreeVotes(disagreeVotes + 1);
     setTotalVotes(totalVotes + 1);
     setHasVoted(true);
+
+    // 퍼시스트
+    setVoteStatus(id, "disagree");
 
     if (onDisagreeClick) onDisagreeClick();
 
@@ -105,7 +127,7 @@ const BillCard: React.FC<BillCardProps> = ({
 
       <div className="flex flex-col gap-3">
         <div className="flex justify-between items-center text-sm text-gray-800 pt-3">
-          <span className="px-1 text-sm font-medium">현재 투표 현황</span>
+          <span className="px-1 text-[15px] font-medium">현재 투표 현황</span>
           <div className="flex items-center gap-1 font-semibold">
             <Users className="w-4 h-4" />
             <span>{totalVotes.toLocaleString()}명 참여</span>
