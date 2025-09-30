@@ -4,15 +4,13 @@ import com.donzo.naitssu.domain.bill.entity.Bill;
 import com.donzo.naitssu.domain.bill.service.BillService;
 import com.donzo.naitssu.domain.vote.entity.Vote;
 import com.donzo.naitssu.domain.vote.repository.VoteRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/bills")
@@ -22,6 +20,8 @@ public class BillController {
 
     private final BillService billService;
     private final VoteRepository voteRepository;
+    
+    private static final String VOTED_BILLS_SESSION_KEY = "votedBills";
 
     @PostMapping("/sync")
     public ResponseEntity<String> syncBillsFromAssembly(
@@ -38,11 +38,18 @@ public class BillController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> getAllBills() {
+    public ResponseEntity<List<Map<String, Object>>> getAllBills(HttpSession session) {
         try {
             List<Bill> bills = billService.getAllBills();
+            Set<Long> votedBills = getVotedBills(session);
+            
+            // N+1 문제 해결: 벌크로 Vote 정보 조회
+            List<Long> billIds = bills.stream().map(Bill::getId).toList();
+            Map<Long, Vote> voteMap = voteRepository.findAllById(billIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Vote::getBillId, v -> v));
+            
             List<Map<String, Object>> content = bills.stream()
-                .map(b -> toBillWithVotes(b, voteRepository.findById(b.getId()).orElse(null)))
+                .map(b -> toBillWithVotes(b, voteMap.get(b.getId()), votedBills.contains(b.getId())))
                 .toList();
             return ResponseEntity.ok(content);
         } catch (Exception e) {
@@ -52,13 +59,14 @@ public class BillController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getBillById(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> getBillById(@PathVariable Long id, HttpSession session) {
         try {
             Optional<Bill> billOpt = billService.getBillById(id);
             if (billOpt.isEmpty()) return ResponseEntity.notFound().build();
             Bill bill = billOpt.get();
             Vote vote = voteRepository.findById(id).orElse(null);
-            return ResponseEntity.ok(toBillWithVotes(bill, vote));
+            Set<Long> votedBills = getVotedBills(session);
+            return ResponseEntity.ok(toBillWithVotes(bill, vote, votedBills.contains(id)));
         } catch (Exception e) {
             log.error("법안 조회 실패: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
@@ -67,13 +75,28 @@ public class BillController {
 
     @GetMapping("/page")
     public ResponseEntity<java.util.Map<String, Object>> getBillsByPage(
-            @RequestParam(defaultValue = "0") int page) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String tag,
+            @RequestParam(defaultValue = "latest") String sort,
+            HttpSession session) {
         try {
             int size = 9;
-            org.springframework.data.domain.Page<Bill> result = billService.getBillsPage(page, size);
+            org.springframework.data.domain.Page<Bill> result;
+            if (tag == null && (sort == null || sort.isBlank() || sort.equalsIgnoreCase("latest"))) {
+                result = billService.getBillsPage(page, size);
+            } else {
+                result = billService.getBillsByTagAndSort(tag, sort, page, size);
+            }
             java.util.Map<String, Object> body = new java.util.HashMap<>();
+            Set<Long> votedBills = getVotedBills(session);
+            
+            // N+1 문제 해결: 벌크로 Vote 정보 조회
+            List<Long> billIds = result.getContent().stream().map(Bill::getId).toList();
+            Map<Long, Vote> voteMap = voteRepository.findAllById(billIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Vote::getBillId, v -> v));
+            
             List<Map<String, Object>> content = result.getContent().stream()
-                .map(b -> toBillWithVotes(b, voteRepository.findById(b.getId()).orElse(null)))
+                .map(b -> toBillWithVotes(b, voteMap.get(b.getId()), votedBills.contains(b.getId())))
                 .toList();
             body.put("content", content);
             body.put("page", result.getNumber());
@@ -92,13 +115,21 @@ public class BillController {
     @GetMapping("/search")
     public ResponseEntity<java.util.Map<String, Object>> searchBills(
             @RequestParam String keyword,
-            @RequestParam(defaultValue = "0") int page) {
+            @RequestParam(defaultValue = "0") int page,
+            HttpSession session) {
         try {
             int size = 9;
             org.springframework.data.domain.Page<Bill> result = billService.searchBillsByTitle(keyword, page, size);
             java.util.Map<String, Object> body = new java.util.HashMap<>();
+            Set<Long> votedBills = getVotedBills(session);
+            
+            // N+1 문제 해결: 벌크로 Vote 정보 조회
+            List<Long> billIds = result.getContent().stream().map(Bill::getId).toList();
+            Map<Long, Vote> voteMap = voteRepository.findAllById(billIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Vote::getBillId, v -> v));
+            
             List<Map<String, Object>> content = result.getContent().stream()
-                .map(b -> toBillWithVotes(b, voteRepository.findById(b.getId()).orElse(null)))
+                .map(b -> toBillWithVotes(b, voteMap.get(b.getId()), votedBills.contains(b.getId())))
                 .toList();
             body.put("content", content);
             body.put("page", result.getNumber());
@@ -116,13 +147,21 @@ public class BillController {
 
     @GetMapping("/page/by-votes")
     public ResponseEntity<java.util.Map<String, Object>> getBillsByVotesDesc(
-            @RequestParam(defaultValue = "0") int page) {
+            @RequestParam(defaultValue = "0") int page,
+            HttpSession session) {
         try {
             int size = 9;
             org.springframework.data.domain.Page<Bill> result = billService.getBillsByVotesDescPage(page, size);
             java.util.Map<String, Object> body = new java.util.HashMap<>();
+            Set<Long> votedBills = getVotedBills(session);
+            
+            // N+1 문제 해결: 벌크로 Vote 정보 조회
+            List<Long> billIds = result.getContent().stream().map(Bill::getId).toList();
+            Map<Long, Vote> voteMap = voteRepository.findAllById(billIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Vote::getBillId, v -> v));
+            
             List<Map<String, Object>> content = result.getContent().stream()
-                .map(b -> toBillWithVotes(b, voteRepository.findById(b.getId()).orElse(null)))
+                .map(b -> toBillWithVotes(b, voteMap.get(b.getId()), votedBills.contains(b.getId())))
                 .toList();
             body.put("content", content);
             body.put("page", result.getNumber());
@@ -139,13 +178,14 @@ public class BillController {
     }
 
     @GetMapping("/top/by-votes")
-    public ResponseEntity<Map<String, Object>> getTopBillByVotes() {
+    public ResponseEntity<Map<String, Object>> getTopBillByVotes(HttpSession session) {
         try {
             java.util.Optional<Bill> topOpt = billService.getTopBillByVotes();
             if (topOpt.isEmpty()) return ResponseEntity.notFound().build();
             Bill bill = topOpt.get();
             Vote vote = voteRepository.findById(bill.getId()).orElse(null);
-            return ResponseEntity.ok(toBillWithVotes(bill, vote));
+            Set<Long> votedBills = getVotedBills(session);
+            return ResponseEntity.ok(toBillWithVotes(bill, vote, votedBills.contains(bill.getId())));
         } catch (Exception e) {
             log.error("최다 투표 법안 조회 실패: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
@@ -154,11 +194,19 @@ public class BillController {
 
     @GetMapping("/topN/by-votes")
     public ResponseEntity<java.util.List<Map<String, Object>>> getTopNBillsByVotes(
-            @RequestParam(defaultValue = "3") int n) {
+            @RequestParam(defaultValue = "3") int n,
+            HttpSession session) {
         try {
             java.util.List<Bill> list = billService.getTopBillsByVotes(n);
+            Set<Long> votedBills = getVotedBills(session);
+            
+            // N+1 문제 해결: 벌크로 Vote 정보 조회
+            List<Long> billIds = list.stream().map(Bill::getId).toList();
+            Map<Long, Vote> voteMap = voteRepository.findAllById(billIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Vote::getBillId, v -> v));
+            
             java.util.List<Map<String, Object>> result = list.stream()
-                .map(b -> toBillWithVotes(b, voteRepository.findById(b.getId()).orElse(null)))
+                .map(b -> toBillWithVotes(b, voteMap.get(b.getId()), votedBills.contains(b.getId())))
                 .toList();
             return ResponseEntity.ok(result);
         } catch (Exception e) {
@@ -170,9 +218,10 @@ public class BillController {
     // /{id}/votes 엔드포인트 제거됨 (단건/목록 응답에 포함)
 
     @PostMapping("/{id}/votes/agree")
-    public ResponseEntity<Vote> incrementAgree(@PathVariable Long id, @RequestParam(defaultValue = "1") int n) {
+    public ResponseEntity<Vote> incrementAgree(@PathVariable Long id, @RequestParam(defaultValue = "1") int n, HttpSession session) {
         try {
             Vote updated = billService.incrementAgree(id, n);
+            addVotedBill(session, id);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
             log.error("찬성 증가 실패: {}", e.getMessage(), e);
@@ -181,18 +230,41 @@ public class BillController {
     }
 
     @PostMapping("/{id}/votes/disagree")
-    public ResponseEntity<Vote> incrementDisagree(@PathVariable Long id, @RequestParam(defaultValue = "1") int n) {
+    public ResponseEntity<Vote> incrementDisagree(@PathVariable Long id, @RequestParam(defaultValue = "1") int n, HttpSession session) {
         try {
             Vote updated = billService.incrementDisagree(id, n);
+            addVotedBill(session, id);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
             log.error("반대 증가 실패: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }
-// 클래스 닫기 전에 헬퍼 메서드 정의 유지
+// 헬퍼 메서드들
 
-    private Map<String, Object> toBillWithVotes(Bill bill, Vote vote) {
+    /**
+     * 세션에서 투표한 법률안 ID 목록 가져오기
+     */
+    @SuppressWarnings("unchecked")
+    private Set<Long> getVotedBills(HttpSession session) {
+        Set<Long> votedBills = (Set<Long>) session.getAttribute(VOTED_BILLS_SESSION_KEY);
+        if (votedBills == null) {
+            votedBills = new HashSet<>();
+            session.setAttribute(VOTED_BILLS_SESSION_KEY, votedBills);
+        }
+        return votedBills;
+    }
+
+    /**
+     * 세션에 투표한 법률안 ID 추가
+     */
+    private void addVotedBill(HttpSession session, Long billId) {
+        Set<Long> votedBills = getVotedBills(session);
+        votedBills.add(billId);
+        session.setAttribute(VOTED_BILLS_SESSION_KEY, votedBills);
+    }
+
+    private Map<String, Object> toBillWithVotes(Bill bill, Vote vote, boolean hasVoted) {
         Map<String, Object> m = new HashMap<>();
         m.put("id", bill.getId());
         m.put("billNo", bill.getBillNo());
@@ -207,6 +279,7 @@ public class BillController {
         m.put("summaryLine", bill.getSummaryLine());
         m.put("summaryHighlight", bill.getSummaryHighlight());
         m.put("tag", bill.getTag());
+        m.put("hasVoted", hasVoted); // 투표 여부 추가
         if (vote != null) {
             m.put("agreeCount", vote.getAgreeCount());
             m.put("disagreeCount", vote.getDisagreeCount());

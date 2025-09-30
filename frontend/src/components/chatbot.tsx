@@ -23,7 +23,7 @@ export const Chatbot = ({
   placeholder = "메세지를 입력하세요.",
   initialMessage = "안녕하세요! 무엇을 도와드릴까요?",
   onCustomAction,
-  customButtonIcon,
+  customButtonIcon
 }: ChatbotProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
