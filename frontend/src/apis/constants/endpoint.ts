@@ -6,6 +6,10 @@ export const CHATBOT_ENDPOINTS = {
   SEND_MESSAGE: "/chat/stream",
 };
 
+export const BILLS_ENDPOINTS = {
+  TOP_N_BY_VOTES: "/api/bills/topN/by-votes",
+};
+
 export const MEETINGS_ENDPOINTS = {
   GET_MEETINGS: "/api/meetings",
 };
