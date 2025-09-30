@@ -75,15 +75,19 @@ export const BillPage = () => {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    setSortType("latest");
+    setCurrentTag("all");
     setCurrentPage(0);
   };
 
   const handleSortChange = (newSortType: SortType) => {
+    setSearchQuery("");
     setSortType(newSortType);
     setCurrentPage(0);
   };
 
   const handleTagChange = (newTag: TagType) => {
+    setSearchQuery("");
     setCurrentTag(newTag);
     setCurrentPage(0);
   };
