@@ -1,6 +1,6 @@
 import axios from "axios";
 import { MEETINGS_ENDPOINTS, API_BASE_URL } from "../constants/endpoint";
-import type { MeetingsResponse, MeetingsParams } from "../types/meetings";
+import type { MeetingsResponse, MeetingsParams, Meeting } from "../types/meetings";
 
 // 회의 API용 axios 인스턴스
 const meetingsClient = axios.create({
@@ -54,6 +54,18 @@ export const meetingsService = {
       return response.data;
     } catch (error) {
       console.error("회의 목록 조회 실패:", error);
+      throw error;
+    }
+  },
+  
+  getLatestMeeting: async (): Promise<Meeting> => {
+    try {
+      const response = await meetingsClient.get<Meeting>(
+        MEETINGS_ENDPOINTS.GET_LATEST_MEETING
+      );
+      return response.data;
+    } catch (error) {
+      console.error("최신 회의 조회 실패:", error);
       throw error;
     }
   },
