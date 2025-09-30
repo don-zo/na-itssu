@@ -5,3 +5,7 @@ export const CHATBOT_ENDPOINTS = {
   CREATE_SESSION: "/session",
   SEND_MESSAGE: "/chat/stream",
 };
+
+export const BILLS_ENDPOINTS = {
+  TOP_N_BY_VOTES: "/api/bills/topN/by-votes",
+};

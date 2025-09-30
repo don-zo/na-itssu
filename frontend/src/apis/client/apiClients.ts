@@ -1,5 +1,5 @@
 import axios from "axios";
-import { CHATBOT_BASE_URL } from "@/apis/constants/endpoint";
+import { CHATBOT_BASE_URL, API_BASE_URL } from "@/apis/constants/endpoint";
 
 export const chatbotClient = axios.create({
   baseURL: CHATBOT_BASE_URL,
@@ -38,3 +38,11 @@ chatbotClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});

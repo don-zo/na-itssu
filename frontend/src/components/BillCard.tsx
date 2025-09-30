@@ -10,6 +10,7 @@ export interface BillCardProps {
   agreeRate: number;
   disagreeRate: number;
   width: string;
+  isHot?: boolean;
 }
 
 const BillCard: React.FC<BillCardProps> = ({
@@ -21,6 +22,7 @@ const BillCard: React.FC<BillCardProps> = ({
   agreeRate,
   disagreeRate,
   width = "360px",
+  isHot = false,
 }) => {
   const [totalVotes, setTotalVotes] = useState(participants);
   const [agreeVotes, setAgreeVotes] = useState(
@@ -30,6 +32,7 @@ const BillCard: React.FC<BillCardProps> = ({
     Math.round((participants * disagreeRate) / 100)
   );
   const [showSnackbar, setShowSnackbar] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
 
   const agreePercent = totalVotes
     ? ((agreeVotes / totalVotes) * 100).toFixed(1)
@@ -39,16 +42,20 @@ const BillCard: React.FC<BillCardProps> = ({
     : "0.0";
 
   const handleAgree = () => {
+    if (hasVoted) return;
     setAgreeVotes(agreeVotes + 1);
     setTotalVotes(totalVotes + 1);
+    setHasVoted(true);
 
     setShowSnackbar(true);
     setTimeout(() => setShowSnackbar(false), 2000);
   };
 
   const handleDisagree = () => {
+    if (hasVoted) return;
     setDisagreeVotes(disagreeVotes + 1);
     setTotalVotes(totalVotes + 1);
+    setHasVoted(true);
 
     setShowSnackbar(true);
     setTimeout(() => setShowSnackbar(false), 2000);
@@ -56,11 +63,14 @@ const BillCard: React.FC<BillCardProps> = ({
 
   return (
     <div 
-      className="bg-white rounded-xl border border-gray-100 shadow-xs p-5 flex flex-col gap-3"
-      style={{ width }}
+      className="bg-white rounded-xl border border-gray-100 shadow-xs p-5 flex flex-col justify-between"
+      style={{ 
+        width, 
+        ...(isHot ? {} : { height: "390px" })
+      }}
     >
       <div className="flex justify-between items-center text-xs text-gray-500">
-        <span className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium">
+        <span className="px-3 py-1 mb-1 bg-gray-100 rounded-full text-xs font-medium">
           {category}
         </span>
         <div className="flex items-center gap-1">
@@ -70,52 +80,68 @@ const BillCard: React.FC<BillCardProps> = ({
       </div>
 
       <div className="text-left">
-        <h3 className="text-lg font-semibold pl-1">{title}</h3>
-        <p className="text-sm text-gray-500 pl-1 pt-5 line-clamp-3">
+        <h3 className="text-black text-lg font-semibold pl-1">{title}</h3>
+        <p className="text-sm text-gray-500 pl-1 pt-5 line-clamp-3 h-[4.8rem]">
           {description}
         </p>
       </div>
 
-      <div className="flex justify-between items-center text-sm text-gray-800">
-        <span className="px-1 pt-3 text-sm">현재 투표 현황</span>
-        <div className="flex items-center gap-1 font-semibold">
-          <Users className="w-4 h-4" />
-          <span>{totalVotes.toLocaleString()}명 참여</span>
+      <div className="flex flex-col gap-3">
+        <div className="flex justify-between items-center text-sm text-gray-800">
+          <span className="px-1 pt-3 text-sm font-medium">현재 투표 현황</span>
+          <div className="flex items-center gap-1 font-semibold">
+            <Users className="w-4 h-4" />
+            <span>{totalVotes.toLocaleString()}명 참여</span>
+          </div>
         </div>
-      </div>
 
-      <div>
-        <div className="flex justify-between text-sm mb-1">
-          <span className="text-blue-600">찬성 {agreePercent}%</span>
-          <span className="text-red-500">반대 {disagreePercent}%</span>
+        <div>
+          <div className="flex justify-between text-sm mb-1">
+            {hasVoted ? (
+              <>
+                <span className="text-blue-600">찬성 {agreePercent}%</span>
+                <span className="text-red-500">반대 {disagreePercent}%</span>
+              </>
+            ) : (
+              <span className="text-gray-500 ml-1">투표 후 결과가 표시됩니다</span>
+            )}
+          </div>
+          <div className="w-full h-3 bg-gray-200 rounded-full flex overflow-hidden">
+            {hasVoted ? (
+              <>
+                <div
+                  className="bg-blue-500 h-3"
+                  style={{ width: `${agreePercent}%` }}
+                ></div>
+                <div
+                  className="bg-red-500 h-3"
+                  style={{ width: `${disagreePercent}%` }}
+                ></div>
+              </>
+            ) : (
+              <div className="bg-gray-300 h-3 w-full"></div>
+            )}
+          </div>
         </div>
-        <div className="w-full h-3 bg-gray-200 rounded-full flex overflow-hidden">
-          <div
-            className="bg-blue-500 h-3"
-            style={{ width: `${agreePercent}%` }}
-          ></div>
-          <div
-            className="bg-red-500 h-3"
-            style={{ width: `${disagreePercent}%` }}
-          ></div>
-        </div>
-      </div>
 
-      <div className="flex gap-3 mt-2">
-        <button
-          onClick={handleAgree}
-          className="flex-1 flex items-center justify-center gap-2 py-2 border border-gray-200 rounded-xl hover:bg-blue-50"
-        >
-          <ThumbsUp className="w-4 h-4 text-blue-500" />
-          <span className="font-medium text-gray-700">찬성</span>
-        </button>
-        <button
-          onClick={handleDisagree}
-          className="flex-1 flex items-center justify-center gap-2 py-2 border border-gray-200 rounded-xl hover:bg-red-50"
-        >
-          <ThumbsDown className="w-4 h-4 text-red-500" />
-          <span className="font-medium text-gray-700">반대</span>
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleAgree}
+            disabled={hasVoted}
+            className="flex-1 flex items-center justify-center gap-2 py-2 border border-gray-200 rounded-xl hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ThumbsUp className="w-4 h-4 text-blue-500" />
+            <span className="font-medium text-gray-700">찬성</span>
+          </button>
+          <button
+            onClick={handleDisagree}
+            disabled={hasVoted}
+            className="flex-1 flex items-center justify-center gap-2 py-2 border border-gray-200 rounded-xl hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ThumbsDown className="w-4 h-4 text-red-500" />
+            <span className="font-medium text-gray-700">반대</span>
+          </button>
+        </div>
       </div>
 
       {showSnackbar && (
