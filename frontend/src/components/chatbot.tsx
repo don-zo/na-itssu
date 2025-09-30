@@ -9,12 +9,28 @@ interface Message {
   timestamp: Date;
 }
 
-export const Chatbot = () => {
+interface ChatbotProps {
+  buttonText?: string;
+  title?: string;
+  placeholder?: string;
+  initialMessage?: string;
+  onCustomAction?: () => void;
+  customButtonIcon?: React.ReactNode;
+}
+
+export const Chatbot = ({ 
+  buttonText = "AI에게 물어보기",
+  title = "법률안 도우미",
+  placeholder = "메세지를 입력하세요.",
+  initialMessage = "안녕하세요! 무엇을 도와드릴까요?",
+  onCustomAction,
+  customButtonIcon
+}: ChatbotProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "안녕하세요! 무엇을 도와드릴까요?",
+      text: initialMessage,
       isUser: false,
       timestamp: new Date(),
     },
@@ -143,20 +159,28 @@ export const Chatbot = () => {
     ));
   };
 
+  const handleButtonClick = () => {
+    if (onCustomAction) {
+      onCustomAction();
+    } else {
+      setIsOpen(!isOpen);
+    }
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-50">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleButtonClick}
         className="bg-blue-500 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg focus:outline-none transition-all duration-200 cursor-pointer"
       >
-        <MessageCircleMore />
+        {customButtonIcon || <MessageCircleMore />}
       </button>
 
       {/* 챗봇 창 */}
       {isOpen && (
         <div className="absolute bottom-18 right-0 w-80 h-120 bg-white rounded-lg shadow-md border border-none flex flex-col">
           <div className="bg-blue-500 text-white p-3 rounded-t-lg flex justify-between items-center">
-            <h2 className="font-semibold">법률안 도우미</h2>
+            <h2 className="font-semibold">{title}</h2>
             <button
               onClick={() => setIsOpen(false)}
               className="text-white hover:text-gray-200 focus:outline-none"
@@ -206,7 +230,7 @@ export const Chatbot = () => {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="메세지를 입력하세요."
+                placeholder={placeholder}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-transparent text-sm transition-all"
                 disabled={isLoading}
               />
