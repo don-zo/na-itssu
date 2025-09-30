@@ -9,6 +9,8 @@ export const CHATBOT_ENDPOINTS = {
 export const BILLS_ENDPOINTS = {
   TOP_N_BY_VOTES: "/api/bills/topN/by-votes",
   GET_BILLS: "/api/bills/page",
+  GET_BILLS_BY_VOTES: "/api/bills/page/by-votes",
+  GET_BILLS_SEARCH: "/api/bills/search",
   BILLS: "/api/bills",
 };
 

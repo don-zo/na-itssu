@@ -6,8 +6,8 @@ import SearchBar from "@/pages/BillPage/components/SearchBar";
 import FilterButtons from "@/pages/BillPage/components/FilterButtons";
 import type { SortType } from "@/pages/BillPage/components/FilterButtons";
 import Chatbot from "@/components/chatbot";
-import { useBills } from "@/apis/hooks/useBills";
-import type { BillTopVotesItem } from "@/apis/types/bills";
+import { useBills, useBillsByVotes, useBillSearch } from "@/apis/hooks/useBills";
+import type { BillPageResponse } from "@/apis/types/bills";
 
 export const BillPage = () => {
   const [currentPage, setCurrentPage] = useState(0); // API는 0부터 시작
@@ -15,46 +15,48 @@ export const BillPage = () => {
   const [sortType, setSortType] = useState<SortType>("latest");
   const itemsPerPage = 9;
 
-  // API 파라미터 구성
+  // 공통 페이지 파라미터
   const apiParams = useMemo(() => {
-    const params: any = {
+    return {
       page: currentPage,
       size: itemsPerPage,
-    };
+    } as const;
+  }, [currentPage]);
 
-    // 정렬 파라미터 설정
-    if (sortType === "latest") {
-      params.sort = "proposeDate,desc";
-    } else if (sortType === "votes") {
-      params.sort = "totalCount,desc";
-    }
+  // 데이터 소스들: 검색 / 최신 / 투표순
+  const { data: searchData, isLoading: isLoadingSearch, error: errorSearch } = useBillSearch(
+    searchQuery || undefined,
+    apiParams.page
+  );
+  const { data: latestData, isLoading: isLoadingLatest, error: errorLatest } = useBills(
+    !searchQuery && sortType === "latest"
+      ? { ...apiParams, sort: "proposeDate,desc" }
+      : undefined
+  );
+  const { data: votesData, isLoading: isLoadingVotes, error: errorVotes } = useBillsByVotes(
+    !searchQuery && sortType === "votes" ? apiParams : undefined
+  );
 
-    return params;
-  }, [currentPage, sortType]);
+  const activeData: BillPageResponse | undefined = searchQuery
+    ? searchData
+    : sortType === "latest"
+    ? latestData
+    : votesData;
 
-  // API 호출
-  const { data: billsData, isLoading, error } = useBills(apiParams);
+  const isLoading = searchQuery
+    ? isLoadingSearch
+    : sortType === "latest"
+    ? isLoadingLatest
+    : isLoadingVotes;
 
-  // 검색어에 따른 필터링 (클라이언트 사이드)
-  const filteredBills = useMemo(() => {
-    if (!billsData?.content) return [];
+  const error = searchQuery
+    ? errorSearch
+    : sortType === "latest"
+    ? errorLatest
+    : errorVotes;
 
-    let bills = billsData.content;
-
-    // 검색 필터링
-    if (searchQuery) {
-      bills = bills.filter(
-        (bill: BillTopVotesItem) =>
-          bill.billName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          bill.summaryLine.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    return bills;
-  }, [billsData?.content, searchQuery]);
-
-  const totalPages = billsData?.totalPages || 0;
-  const hasSearchResults = filteredBills.length > 0;
+  const totalPages = activeData?.totalPages ?? 0;
+  const hasResults = (activeData?.content?.length ?? 0) > 0;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page - 1); // API는 0부터 시작하므로 1 빼기
@@ -117,7 +119,7 @@ export const BillPage = () => {
 
         <SearchBar onSearch={handleSearch} />
 
-        {hasSearchResults ? (
+        {hasResults ? (
           <>
             <div className="relative max-w-[1120px] mx-auto mb-8">
               <div className="flex justify-end">
@@ -142,7 +144,7 @@ export const BillPage = () => {
             />
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16">
+          <div className="flex flex-col items-center justify-center pt-16 pb-70">
             <div className="text-gray-500 text-lg mb-4">
               검색 결과가 없습니다
             </div>

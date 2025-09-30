@@ -33,4 +33,20 @@ export const billsService = {
     );
     return res.data;
   },
+
+  async getBillsPageByVotes(params?: BillPageParams): Promise<BillPageResponse> {
+    const res = await apiClient.get<BillPageResponse>(
+      BILLS_ENDPOINTS.GET_BILLS_BY_VOTES,
+      { params }
+    );
+    return res.data;
+  },
+
+  async searchBills(keyword: string, page: number): Promise<BillPageResponse> {
+    const res = await apiClient.get<BillPageResponse>(
+      BILLS_ENDPOINTS.GET_BILLS_SEARCH,
+      { params: { keyword, page } }
+    );
+    return res.data;
+  },
 };
