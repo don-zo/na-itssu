@@ -74,14 +74,20 @@ const BillCard: React.FC<BillCardProps> = ({
     if (hasVoted || voting) return;
     try {
       setVoting(true);
-      await billsService.voteAgree(id);
+      if (onAgreeClick) {
+        // 부모가 API 호출을 처리하는 경우, 중복 호출을 피하고
+        // 여기서는 낙관적 UI 업데이트만 수행
+        onAgreeClick();
+      } else {
+        // 부모 콜백이 없을 때만 직접 API 호출
+        await billsService.voteAgree(id);
+      }
 
       // 클라이언트 표시값 1 증가 (서버와 일치)
       setAgreeVotes((v) => v + 1);
       setTotalVotes((v) => v + 1);
       setHasVoted(true);
       setVoteStatus(id, "agree");
-      if (onAgreeClick) onAgreeClick();
       setShowSnackbar(true);
       setTimeout(() => setShowSnackbar(false), 2000);
     } catch (e) {
@@ -96,14 +102,19 @@ const BillCard: React.FC<BillCardProps> = ({
     if (hasVoted || voting) return;
     try {
       setVoting(true);
-      await billsService.voteDisagree(id);
+      if (onDisagreeClick) {
+        // 부모가 API 호출을 처리하는 경우 중복 호출 방지
+        onDisagreeClick();
+      } else {
+        // 부모 콜백이 없을 때만 직접 API 호출
+        await billsService.voteDisagree(id);
+      }
 
       // 클라이언트 표시값 1 증가 (서버와 일치)
       setDisagreeVotes((v) => v + 1);
       setTotalVotes((v) => v + 1);
       setHasVoted(true);
       setVoteStatus(id, "disagree");
-      if (onDisagreeClick) onDisagreeClick();
       setShowSnackbar(true);
       setTimeout(() => setShowSnackbar(false), 2000);
     } catch (e) {
