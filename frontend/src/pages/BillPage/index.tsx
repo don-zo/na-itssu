@@ -6,7 +6,11 @@ import SearchBar from "@/pages/BillPage/components/SearchBar";
 import FilterButtons from "@/pages/BillPage/components/FilterButtons";
 import type { SortType } from "@/pages/BillPage/components/FilterButtons";
 import Chatbot from "@/components/chatbot";
-import { useBills, useBillsByVotes, useBillSearch } from "@/apis/hooks/useBills";
+import {
+  useBills,
+  useBillsByVotes,
+  useBillSearch,
+} from "@/apis/hooks/useBills";
 import type { BillPageResponse } from "@/apis/types/bills";
 
 export const BillPage = () => {
@@ -24,16 +28,25 @@ export const BillPage = () => {
   }, [currentPage]);
 
   // 데이터 소스들: 검색 / 최신 / 투표순
-  const { data: searchData, isLoading: isLoadingSearch, error: errorSearch } = useBillSearch(
-    searchQuery || undefined,
-    apiParams.page
-  );
-  const { data: latestData, isLoading: isLoadingLatest, error: errorLatest } = useBills(
+  const {
+    data: searchData,
+    isLoading: isLoadingSearch,
+    error: errorSearch,
+  } = useBillSearch(searchQuery || undefined, apiParams.page);
+  const {
+    data: latestData,
+    isLoading: isLoadingLatest,
+    error: errorLatest,
+  } = useBills(
     !searchQuery && sortType === "latest"
       ? { ...apiParams, sort: "proposeDate,desc" }
       : undefined
   );
-  const { data: votesData, isLoading: isLoadingVotes, error: errorVotes } = useBillsByVotes(
+  const {
+    data: votesData,
+    isLoading: isLoadingVotes,
+    error: errorVotes,
+  } = useBillsByVotes(
     !searchQuery && sortType === "votes" ? apiParams : undefined
   );
 
@@ -154,7 +167,7 @@ export const BillPage = () => {
           </div>
         )}
       </div>
-      <div className="bg-gray-50 p-8">
+      <div className="bg-gray-50">
         <Chatbot />
       </div>
     </>

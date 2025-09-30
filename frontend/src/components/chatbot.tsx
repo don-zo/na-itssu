@@ -18,8 +18,7 @@ interface ChatbotProps {
   customButtonIcon?: React.ReactNode;
 }
 
-export const Chatbot = ({ 
-  buttonText = "AI에게 물어보기",
+export const Chatbot = ({
   title = "법률안 도우미",
   placeholder = "메세지를 입력하세요.",
   initialMessage = "안녕하세요! 무엇을 도와드릴까요?",
