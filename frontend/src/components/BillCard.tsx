@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Calendar, Users, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getVoteStatus, setVoteStatus } from "@/utils/voteStorage";
+import { billsService } from "@/apis/services/bills";
 
 export interface BillCardProps {
   id: number;
@@ -42,6 +44,17 @@ const BillCard: React.FC<BillCardProps> = ({
   );
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
+  const [voting, setVoting] = useState(false);
+
+  // 기존 투표 여부 동기화 (로컬스토리지)
+  useEffect(() => {
+    const status = getVoteStatus(id);
+    if (status.voted) {
+      // 이미 투표한 경우, 숫자를 로컬에서 증가시키지 않고 상태만 반영
+      setHasVoted(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const agreePercent = totalVotes
     ? ((agreeVotes / totalVotes) * 100).toFixed(1)
@@ -50,28 +63,48 @@ const BillCard: React.FC<BillCardProps> = ({
     ? ((disagreeVotes / totalVotes) * 100).toFixed(1)
     : "0.0";
 
-  const handleAgree = () => {
-    if (hasVoted) return;
-    setAgreeVotes(agreeVotes + 1);
-    setTotalVotes(totalVotes + 1);
-    setHasVoted(true);
+  const handleAgree = async () => {
+    if (hasVoted || voting) return;
+    try {
+      setVoting(true);
+      await billsService.voteAgree(id);
 
-    if (onAgreeClick) onAgreeClick();
-
-    setShowSnackbar(true);
-    setTimeout(() => setShowSnackbar(false), 2000);
+      // 클라이언트 표시값 1 증가 (서버와 일치)
+      setAgreeVotes((v) => v + 1);
+      setTotalVotes((v) => v + 1);
+      setHasVoted(true);
+      setVoteStatus(id, "agree");
+      if (onAgreeClick) onAgreeClick();
+      setShowSnackbar(true);
+      setTimeout(() => setShowSnackbar(false), 2000);
+    } catch (e) {
+      console.error("찬성 투표 실패:", e);
+      alert("투표에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setVoting(false);
+    }
   };
 
-  const handleDisagree = () => {
-    if (hasVoted) return;
-    setDisagreeVotes(disagreeVotes + 1);
-    setTotalVotes(totalVotes + 1);
-    setHasVoted(true);
+  const handleDisagree = async () => {
+    if (hasVoted || voting) return;
+    try {
+      setVoting(true);
+      await billsService.voteDisagree(id);
 
-    if (onDisagreeClick) onDisagreeClick();
-
-    setShowSnackbar(true);
-    setTimeout(() => setShowSnackbar(false), 2000);
+      // 클라이언트 표시값 1 증가 (서버와 일치)
+      setDisagreeVotes((v) => v + 1);
+      setTotalVotes((v) => v + 1);
+      setHasVoted(true);
+      setVoteStatus(id, "disagree");
+      if (onDisagreeClick) onDisagreeClick();
+      setShowSnackbar(true);
+      setTimeout(() => setShowSnackbar(false), 2000);
+    } catch (e) {
+      console.error("반대 투표 실패:", e);
+      alert("투표에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setVoting(false);
+    }
   };
 
   const handleDetail = () => {
@@ -105,7 +138,7 @@ const BillCard: React.FC<BillCardProps> = ({
 
       <div className="flex flex-col gap-3">
         <div className="flex justify-between items-center text-sm text-gray-800 pt-3">
-          <span className="px-1 text-sm font-medium">현재 투표 현황</span>
+          <span className="px-1 text-[15px] font-medium">현재 투표 현황</span>
           <div className="flex items-center gap-1 font-semibold">
             <Users className="w-4 h-4" />
             <span>{totalVotes.toLocaleString()}명 참여</span>
@@ -144,7 +177,7 @@ const BillCard: React.FC<BillCardProps> = ({
         <div className="flex gap-3">
           <button
             onClick={handleAgree}
-            disabled={hasVoted}
+            disabled={hasVoted || voting}
             className="flex-1 flex items-center justify-center gap-2 py-2 border border-gray-200 rounded-xl hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ThumbsUp className="w-4 h-4 text-blue-500" />
@@ -152,7 +185,7 @@ const BillCard: React.FC<BillCardProps> = ({
           </button>
           <button
             onClick={handleDisagree}
-            disabled={hasVoted}
+            disabled={hasVoted || voting}
             className="flex-1 flex items-center justify-center gap-2 py-2 border border-gray-200 rounded-xl hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ThumbsDown className="w-4 h-4 text-red-500" />
