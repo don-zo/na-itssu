@@ -5,6 +5,8 @@ import Pagination from "@/components/Pagination";
 import SearchBar from "@/pages/BillPage/components/SearchBar";
 import FilterButtons from "@/pages/BillPage/components/FilterButtons";
 import type { SortType } from "@/pages/BillPage/components/FilterButtons";
+import TagButtons from "@/pages/BillPage/components/TagButtons";
+import type { TagType } from "@/pages/BillPage/components/TagButtons";
 import Chatbot from "@/components/chatbot";
 import { useBills, useBillsByVotes, useBillSearch } from "@/apis/hooks/useBills";
 import type { BillPageResponse } from "@/apis/types/bills";
@@ -13,47 +15,66 @@ export const BillPage = () => {
   const [currentPage, setCurrentPage] = useState(0); // API는 0부터 시작
   const [searchQuery, setSearchQuery] = useState("");
   const [sortType, setSortType] = useState<SortType>("latest");
+  const [currentTag, setCurrentTag] = useState<TagType>("all");
   const itemsPerPage = 9;
 
   // 공통 페이지 파라미터
   const apiParams = useMemo(() => {
+    const mapTagToKorean = (tag: TagType): string | undefined => {
+      switch (tag) {
+        case "transport":
+          return "교통";
+        case "housing":
+          return "주거";
+        case "economy":
+          return "경제";
+        case "environment":
+          return "환경";
+        case "employment":
+          return "고용";
+        case "other":
+          return "기타";
+        case "all":
+        default:
+          return undefined; // 전체는 파라미터 생략
+      }
+    };
+
+    const tagParam = mapTagToKorean(currentTag);
+    const sortParam = sortType === "votes" ? "votes" : "latest";
+
     return {
       page: currentPage,
       size: itemsPerPage,
+      ...(tagParam ? { tag: tagParam } : {}),
+      sort: sortParam,
     } as const;
-  }, [currentPage]);
+  }, [currentPage, itemsPerPage, currentTag, sortType]);
 
   // 데이터 소스들: 검색 / 최신 / 투표순
   const { data: searchData, isLoading: isLoadingSearch, error: errorSearch } = useBillSearch(
     searchQuery || undefined,
     apiParams.page
   );
-  const { data: latestData, isLoading: isLoadingLatest, error: errorLatest } = useBills(
-    !searchQuery && sortType === "latest"
-      ? { ...apiParams, sort: "proposeDate,desc" }
-      : undefined
+  // 투표순 & 전체(태그 없음)일 때는 별도 엔드포인트(/page/by-votes) 사용
+  const useVotesEndpoint = !searchQuery && sortType === "votes" && currentTag === "all";
+
+  const { data: listData, isLoading: isLoadingList, error: errorList } = useBills(
+    !searchQuery && !useVotesEndpoint ? apiParams : undefined
   );
-  const { data: votesData, isLoading: isLoadingVotes, error: errorVotes } = useBillsByVotes(
-    !searchQuery && sortType === "votes" ? apiParams : undefined
-  );
+
+  const { data: votesOnlyData, isLoading: isLoadingVotesOnly, error: errorVotesOnly } =
+    useBillsByVotes(!searchQuery && useVotesEndpoint ? { page: apiParams.page, size: apiParams.size } : undefined);
 
   const activeData: BillPageResponse | undefined = searchQuery
     ? searchData
-    : sortType === "latest"
-    ? latestData
-    : votesData;
+    : useVotesEndpoint
+    ? votesOnlyData
+    : listData;
 
-  const isLoading = searchQuery
-    ? isLoadingSearch
-    : sortType === "latest"
-    ? isLoadingLatest
-    : isLoadingVotes;
+  const isLoading = searchQuery ? isLoadingSearch : useVotesEndpoint ? isLoadingVotesOnly : isLoadingList;
 
-  const error = searchQuery
-    ? errorSearch
-    : sortType === "latest"
-    ? errorLatest
-    : errorVotes;
+  const error = searchQuery ? errorSearch : useVotesEndpoint ? errorVotesOnly : errorList;
 
   const totalPages = activeData?.totalPages ?? 0;
   const hasResults = (activeData?.content?.length ?? 0) > 0;
@@ -69,6 +90,11 @@ export const BillPage = () => {
 
   const handleSortChange = (newSortType: SortType) => {
     setSortType(newSortType);
+    setCurrentPage(0);
+  };
+
+  const handleTagChange = (newTag: TagType) => {
+    setCurrentTag(newTag);
     setCurrentPage(0);
   };
 
@@ -119,23 +145,25 @@ export const BillPage = () => {
 
         <SearchBar onSearch={handleSearch} />
 
+        <div className="relative max-w-[1120px] mx-auto mb-8">
+          <div className="flex items-center justify-between gap-4">
+            <TagButtons onTagChange={handleTagChange} currentTag={currentTag} />
+            <FilterButtons
+              onSortChange={handleSortChange}
+              currentSort={sortType}
+            />
+          </div>
+          <div className="border-t border-gray-100 mt-4"></div>
+        </div>
+
         {hasResults ? (
           <>
-            <div className="relative max-w-[1120px] mx-auto mb-8">
-              <div className="flex justify-end">
-                <FilterButtons
-                  onSortChange={handleSortChange}
-                  currentSort={sortType}
-                />
-              </div>
-              <div className="border-t border-gray-100 mt-4"></div>
-            </div>
-
             <BillCardList
               currentPage={currentPage + 1} // 컴포넌트는 1부터 시작
               itemsPerPage={itemsPerPage}
               searchQuery={searchQuery}
               sortType={sortType}
+              currentTag={currentTag}
             />
             <Pagination
               currentPage={currentPage + 1} // 컴포넌트는 1부터 시작
