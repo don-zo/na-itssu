@@ -12,7 +12,6 @@ export interface ConferenceData {
 export const mockConferenceData: ConferenceData[] = [
   {
     id: 1,
-    conf_id: 1,
     title: "국정감사 결과 보고",
     date: "2024-01-15",
     summary: "2024년도 국정감사 결과를 종합적으로 보고합니다.",
@@ -28,7 +27,6 @@ export const mockConferenceData: ConferenceData[] = [
   },
   {
     id: 2,
-    conf_id: 2,
     title: "예산안 심의",
     date: "2024-01-20",
     summary: "2024년도 정부 예산안에 대한 심의를 진행합니다.",
@@ -44,7 +42,6 @@ export const mockConferenceData: ConferenceData[] = [
   },
   {
     id: 3,
-    conf_id: 3,
     title: "법률안 심의",
     date: "2024-01-25",
     summary: "새로운 법률안에 대한 심의를 진행합니다.",
@@ -60,7 +57,6 @@ export const mockConferenceData: ConferenceData[] = [
   },
   {
     id: 4,
-    conf_id: 4,
     title: "정책 질의응답",
     date: "2024-01-30",
     summary: "정부 정책에 대한 질의응답을 진행합니다.",
@@ -76,7 +72,6 @@ export const mockConferenceData: ConferenceData[] = [
   },
   {
     id: 5,
-    conf_id: 5,
     title: "국정감사 계획",
     date: "2024-02-05",
     summary: "다음 국정감사 계획을 수립합니다.",
@@ -92,7 +87,6 @@ export const mockConferenceData: ConferenceData[] = [
   },
   {
     id: 6,
-    conf_id: 6,
     title: "예산 집행 보고",
     date: "2024-02-10",
     summary: "예산 집행 현황을 보고합니다.",
@@ -108,7 +102,6 @@ export const mockConferenceData: ConferenceData[] = [
   },
   {
     id: 7,
-    conf_id: 7,
     title: "정책 검토",
     date: "2024-02-15",
     summary: "현재 정책들의 효과를 검토합니다.",
@@ -124,7 +117,6 @@ export const mockConferenceData: ConferenceData[] = [
   },
   {
     id: 8,
-    conf_id: 8,
     title: "법률 개정안",
     date: "2024-02-20",
     summary: "기존 법률의 개정안을 검토합니다.",
@@ -140,7 +132,6 @@ export const mockConferenceData: ConferenceData[] = [
   },
   {
     id: 9,
-    conf_id: 9,
     title: "국정감사 결과",
     date: "2024-02-25",
     summary: "국정감사 결과를 종합 정리합니다.",

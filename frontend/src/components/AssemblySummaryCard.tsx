@@ -102,7 +102,7 @@ const AssemblySummaryCard: React.FC<AssemblySummaryCardProps> = ({
         {
           message: trimmed,
           sessionId: currentSessionId, // 생성된 세션 ID 사용
-          billId: conferenceId,
+          meetingId: conferenceId,
         },
         (chunk: string) => {
           setMessages((prev) =>
