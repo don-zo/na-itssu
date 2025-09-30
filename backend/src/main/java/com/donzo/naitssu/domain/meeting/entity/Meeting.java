@@ -44,7 +44,10 @@ public class Meeting extends BaseEntity {
     private String confId; // 회의ID (CONF_ID)
 
     @Column(columnDefinition = "TEXT")
-    private String summary; // PDF 요약 내용
+    private String summary; // PDF 요약 내용 (줄글 형태)
+
+    @Column(columnDefinition = "TEXT")
+    private String generalSummary; // 일반 요약 내용 (내부 처리용)
 
     @Column(columnDefinition = "JSON")
     private String discussionItems; // 주요 논의사항 (JSON 배열)
@@ -52,7 +55,7 @@ public class Meeting extends BaseEntity {
     @Builder
     public Meeting(String conferNum, String title, String className, String daeNum, 
                   String confDate, String subName, String vodLinkUrl, String confLinkUrl, 
-                  String pdfLinkUrl, String confId, String summary, String discussionItems) {
+                  String pdfLinkUrl, String confId, String summary, String generalSummary, String discussionItems) {
         this.conferNum = conferNum;
         this.title = title;
         this.className = className;
@@ -64,11 +67,16 @@ public class Meeting extends BaseEntity {
         this.pdfLinkUrl = pdfLinkUrl;
         this.confId = confId;
         this.summary = summary;
+        this.generalSummary = generalSummary;
         this.discussionItems = discussionItems;
     }
     
     public void updateSummary(String summary) {
         this.summary = summary;
+    }
+    
+    public void updateGeneralSummary(String generalSummary) {
+        this.generalSummary = generalSummary;
     }
     
     public void updateAnalysis(String discussionItems) {

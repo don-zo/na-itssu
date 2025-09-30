@@ -96,7 +96,8 @@ public class MeetingUpdateService {
                                     .confLinkUrl(meetingData.getConfLinkUrl())
                                     .pdfLinkUrl(meetingData.getPdfLinkUrl())
                                     .confId(meetingData.getConfId())
-                                    .summary("") // 초기에는 빈 요약
+                                    .summary("") // 초기에는 빈 요약 (줄글)
+                                    .generalSummary("") // 초기에는 빈 일반 요약
                                     .discussionItems("[]") // 초기에는 빈 배열
                                     .build();
                             
@@ -167,6 +168,7 @@ public class MeetingUpdateService {
         meetingRepository.findById(meetingId)
                 .ifPresent(meeting -> {
                     meeting.updateSummary(analysisData.getSummary());
+                    meeting.updateGeneralSummary(analysisData.getGeneralSummary());
                     meeting.updateAnalysis(analysisData.getDiscussionItemsJson());
                     meetingRepository.save(meeting);
                 });

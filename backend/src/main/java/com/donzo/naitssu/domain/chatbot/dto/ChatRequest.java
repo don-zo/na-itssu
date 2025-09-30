@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ChatRequest {
     private Long billId;
+    private Long meetingId;
     private String message;
     private String sessionId;
 }

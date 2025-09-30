@@ -16,15 +16,14 @@ import reactor.core.publisher.Flux;
 @RequestMapping("/api/chatbot")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class ChatBotController {
 
     private final ChatBotService chatBotService;
 
     @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> chatStream(@RequestBody ChatRequest request) {
-        log.info("챗봇 스트리밍 요청: billId={}, message={}, sessionId={}", 
-                request.getBillId(), request.getMessage(), request.getSessionId());
+        log.info("챗봇 스트리밍 요청: billId={}, meetingId={}, message={}, sessionId={}", 
+                request.getBillId(), request.getMeetingId(), request.getMessage(), request.getSessionId());
         
         return chatBotService.chatStream(request)
                 .filter(Objects::nonNull)
@@ -38,6 +37,7 @@ public class ChatBotController {
                 .onErrorReturn("죄송합니다. 서비스에 문제가 발생했습니다.");
     }
 
+
     @PostMapping("/session")
     public ResponseEntity<Map<String, String>> createSession() {
         String sessionId = chatBotService.createSession();
@@ -46,6 +46,7 @@ public class ChatBotController {
         log.info("새 세션 생성: sessionId={}", sessionId);
         return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/health")
     public ResponseEntity<String> health() {
