@@ -16,10 +16,11 @@ export const AssemblySummaryCardList = ({
             key={item.id}
             title={item.title}
             date={item.date}
-            duration={item.duration}
             summary={item.summary}
-            agenda={item.agenda}
-            decision={item.decision}
+            discussion_items={item.discussion_items}
+            pdfLinkUrl={item.pdf_link_url}
+            vodLinkUrl={item.vod_link_url}
+            conferenceId={item.conf_id}
           />
         ))}
       </div>

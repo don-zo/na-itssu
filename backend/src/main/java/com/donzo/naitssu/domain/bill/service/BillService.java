@@ -167,12 +167,12 @@ public class BillService {
                    try {
                        com.fasterxml.jackson.databind.ObjectMapper om = new com.fasterxml.jackson.databind.ObjectMapper();
                        com.fasterxml.jackson.databind.JsonNode root = om.readTree(summary);
-                       // 배열 필드는 원본 배열을 문자열로 저장
-                       if (root.has("background")) backgroundJson = om.writeValueAsString(root.get("background"));
-                       if (root.has("content")) contentJson = om.writeValueAsString(root.get("content"));
-                       if (root.has("effect")) effectJson = om.writeValueAsString(root.get("effect"));
-                       if (root.has("summary")) summaryLine = root.get("summary").asText();
-                       if (root.has("highlight")) summaryHighlight = root.get("highlight").asText();
+                       // 새 스펙 키에 맞춰 저장
+                       if (root.has("summaryBackground")) backgroundJson = root.get("summaryBackground").isArray() ? om.writeValueAsString(root.get("summaryBackground")) : root.get("summaryBackground").asText();
+                       if (root.has("summaryContent")) contentJson = om.writeValueAsString(root.get("summaryContent"));
+                       if (root.has("summaryEffect")) effectJson = om.writeValueAsString(root.get("summaryEffect"));
+                       if (root.has("summaryLine")) summaryLine = root.get("summaryLine").asText();
+                       if (root.has("summaryHighlight")) summaryHighlight = root.get("summaryHighlight").asText();
                        if (root.has("tag")) tag = root.get("tag").asText();
                    } catch (Exception parseEx) {
                        log.warn("요약 JSON 파싱 실패, 원문 summary만 저장: {}", parseEx.getMessage());

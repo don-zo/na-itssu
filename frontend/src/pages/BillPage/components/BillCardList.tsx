@@ -54,6 +54,7 @@ export const BillCardList = ({
               participants={Math.floor(Math.random() * 1000) + 100}
               agreeRate={Math.floor(Math.random() * 40) + 30}
               disagreeRate={Math.floor(Math.random() * 40) + 30}
+              width="360px"
             />
           ))}
         </div>

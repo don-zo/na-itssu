@@ -22,7 +22,9 @@ export const Chatbot = () => {
   const [inputText, setInputText] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [streamingMessageId, setStreamingMessageId] = useState<number | null>(null);
+  const [streamingMessageId, setStreamingMessageId] = useState<number | null>(
+    null
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 자동 스크롤 함수
@@ -65,7 +67,7 @@ export const Chatbot = () => {
       // 스트리밍 응답을 위한 빈 메시지 생성
       const botMessageId = messages.length + 2;
       setStreamingMessageId(botMessageId);
-      
+
       setMessages((prev) => {
         const botMessage: Message = {
           id: botMessageId,
@@ -86,9 +88,7 @@ export const Chatbot = () => {
         (chunk: string) => {
           setMessages((prev) =>
             prev.map((msg) =>
-              msg.id === botMessageId
-                ? { ...msg, text: msg.text + chunk }
-                : msg
+              msg.id === botMessageId ? { ...msg, text: msg.text + chunk } : msg
             )
           );
         },
@@ -112,7 +112,6 @@ export const Chatbot = () => {
           setIsLoading(false);
         }
       );
-
     } catch (error) {
       console.error("챗봇 API 오류:", error);
       setMessages((prev) => {
@@ -136,10 +135,10 @@ export const Chatbot = () => {
 
   // 텍스트를 줄바꿈으로 분할하여 렌더링하는 함수
   const renderTextWithLineBreaks = (text: string) => {
-    return text.split('\n').map((line, index) => (
+    return text.split("\n").map((line, index) => (
       <span key={index}>
         {line}
-        {index < text.split('\n').length - 1 && <br />}
+        {index < text.split("\n").length - 1 && <br />}
       </span>
     ));
   };
