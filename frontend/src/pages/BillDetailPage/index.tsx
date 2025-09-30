@@ -164,9 +164,9 @@ export const BillDetailPage = () => {
                         <Users className="w-4 h-4 text-gray-500" />
                         <p className="text-sm text-gray-500">{bill.proposer}</p>
                     </div>
-                     <div className="inline-flex items-center gap-2">
-                         <Target className="w-4 h-4 text-gray-500" />
-                         <p className="text-sm text-gray-500">{summaryHighlight}</p>
+                     <div className="flex items-center gap-2">
+                         <Target className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                         <p className="text-sm text-gray-500 leading-relaxed break-words max-w-xs">{summaryHighlight}</p>
                     </div>
                 </div>
                 <div className="h-px bg-gray-200 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] mb-8"></div>
