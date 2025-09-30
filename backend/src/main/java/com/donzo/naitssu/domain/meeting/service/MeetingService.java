@@ -6,13 +6,13 @@ import com.donzo.naitssu.domain.meeting.entity.Meeting;
 import com.donzo.naitssu.domain.meeting.repository.MeetingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -76,6 +76,18 @@ public class MeetingService {
                 .hasNext(hasNext)
                 .nextCursor(nextCursor)
                 .build();
+    }
+    
+    /**
+     * 최신 회의 1건 조회
+     */
+    public Optional<MeetingResponse> getLatestMeeting() {
+        Pageable pageable = PageRequest.of(0, 1);
+        var page = meetingRepository.findLatest(pageable);
+        if (page.hasContent()) {
+            return Optional.of(MeetingResponse.from(page.getContent().get(0)));
+        }
+        return Optional.empty();
     }
     
 }
