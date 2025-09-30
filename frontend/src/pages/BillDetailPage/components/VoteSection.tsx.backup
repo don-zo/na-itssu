@@ -1,0 +1,149 @@
+import { ThumbsUp, ThumbsDown, MessageCircle } from "lucide-react";
+import type { BillTopVotesItem } from "@/apis/types/bills";
+
+interface VoteSectionProps {
+  bill: BillTopVotesItem;
+  hasVoted: boolean;
+  voting: boolean;
+  onVoteAgree: () => void;
+  onVoteDisagree: () => void;
+  onOpenChatbot: () => void;
+}
+
+export const VoteSection = ({ 
+  bill, 
+  hasVoted, 
+  voting, 
+  onVoteAgree, 
+  onVoteDisagree,
+  onOpenChatbot
+}: VoteSectionProps) => {
+  return (
+    <div className="col-span-1">
+      <div className="sticky top-24">
+        <div className="px-6 py-5 border border-gray-200 rounded-xl bg-white mb-4 h-fit">
+          <h1 className="text-[22px] font-bold text-gray-800 mb-1">
+            시민 의견 투표
+          </h1>
+          <p className="text-sm text-gray-500 mb-4">
+            이 법률안에 대한 의견을 투표해주세요.
+          </p>
+
+          <div className="mb-4">
+            <div className="flex justify-between text-sm mb-3">
+              {hasVoted ? (
+                <>
+                  <span className="text-blue-600">
+                    찬성{" "}
+                    {bill.totalCount > 0
+                      ? (
+                          (bill.agreeCount / bill.totalCount) *
+                          100
+                        ).toFixed(1)
+                      : "0.0"}
+                    %
+                  </span>
+                  <span className="text-red-500">
+                    반대{" "}
+                    {bill.totalCount > 0
+                      ? (
+                          (bill.disagreeCount / bill.totalCount) *
+                          100
+                        ).toFixed(1)
+                      : "0.0"}
+                    %
+                  </span>
+                </>
+              ) : (
+                <span className="text-gray-500 ml-1">
+                  투표 후 결과가 표시됩니다
+                </span>
+              )}
+            </div>
+            <div className="w-full h-4 bg-gray-200 rounded-full flex overflow-hidden">
+              {hasVoted ? (
+                <>
+                  <div
+                    className="bg-blue-500 h-4"
+                    style={{
+                      width: `${
+                        (bill.agreeCount / bill.totalCount) * 100
+                      }%`,
+                    }}
+                  ></div>
+                  <div
+                    className="bg-red-500 h-4"
+                    style={{
+                      width: `${
+                        (bill.disagreeCount / bill.totalCount) *
+                        100
+                      }%`,
+                    }}
+                  ></div>
+                </>
+              ) : (
+                <div className="bg-gray-300 h-4 w-full"></div>
+              )}
+            </div>
+          </div>
+
+          <p className="text-sm text-gray-500 mb-6 text-center">
+            총 {bill.totalCount.toLocaleString()}명 참여
+          </p>
+
+          <div className="border-t border-gray-200 mb-6"></div>
+
+          <div className="mb-2 flex flex-col gap-3">
+            <button
+              onClick={onVoteAgree}
+              disabled={voting || hasVoted}
+              className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ThumbsUp className="w-4 h-4 text-blue-600" />
+              <span className="font-medium text-gray-700 text-sm">
+                {voting
+                  ? "투표 중..."
+                  : hasVoted
+                  ? "투표 완료"
+                  : "찬성합니다"}
+              </span>
+            </button>
+            <button
+              onClick={onVoteDisagree}
+              disabled={voting || hasVoted}
+              className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ThumbsDown className="w-4 h-4 text-red-600" />
+              <span className="font-medium text-gray-700 text-sm">
+                {voting
+                  ? "투표 중..."
+                  : hasVoted
+                  ? "투표 완료"
+                  : "반대합니다"}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <a
+          href={`https://search.naver.com/search.naver?query=${encodeURIComponent(
+            bill.billName
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full px-6 py-3 border border-gray-200 text-[17px] rounded-xl bg-white font-semibold hover:bg-gray-50 text-center inline-block mb-3"
+        >
+          관련 내용 검색
+        </a>
+
+        <button
+          onClick={onOpenChatbot}
+          className="w-full px-6 py-3 border border-gray-200 text-[17px] rounded-xl bg-white font-semibold hover:bg-gray-50 text-center inline-flex items-center justify-center gap-2"
+        >
+          <MessageCircle className="w-5 h-5" />
+          AI에게 질문하기
+        </button>
+      </div>
+    </div>
+  );
+};
