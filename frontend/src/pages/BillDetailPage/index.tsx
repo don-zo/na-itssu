@@ -1,61 +1,11 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Chatbot from "@/components/chatbot";
 import { ROUTES } from "@/routes/path";
-import {
-  ArrowLeft,
-  Calendar,
-  Building2,
-  Users,
-  Target,
-  Clock,
-  ThumbsUp,
-  ThumbsDown,
-} from "lucide-react";
-
-type DetailBillData = {
-  summaryContent: string; // JSON 배열 문자열 형태
-  proposerKind: string;
-  proposer: string;
-  summaryBackground: string; // JSON 배열 문자열 형태
-  disagreeCount: number;
-  totalCount: number;
-  billName: string;
-  summaryHighlight: string;
-  stage: string;
-  summaryEffect: string; // JSON 배열 문자열 형태
-  agreeCount: number;
-  summaryLine: string;
-  id: number;
-  tag: string;
-  billNo: number;
-  proposeDate: string;
-};
-
-const dataById: Record<number, DetailBillData> = {
-  1: {
-    summaryContent:
-      '["세금 감면 대상 확대","감면 기준 및 절차 강화","지방세 체납자에 대한 제재 강화"]',
-    proposerKind: "의원",
-    proposer: "채현일의원 등 11인",
-    summaryBackground:
-      "현행 지방세특례제한법은 특정 대상에 대한 지방세 감면 규정을 두고 있으나, 일부 사각지대와 문제점이 제기됨. 이에 부족한 부분을 보완하고, 공정한 세금 부과를 위한 개선이 필요함.",
-    disagreeCount: 231,
-    totalCount: 2543,
-    billName: "지방세특례제한법 일부개정법률안",
-    summaryHighlight: "[세금 감면 대상 확대, 감면 기준 강화, 체납자 제재 강화]",
-    stage: "접수(발의)",
-    summaryEffect:
-      '["공정한 세금 부과 체계 확립","취약계층 지원 확대","세수 확충을 통한 지역 발전 투자"]',
-    agreeCount: 2312,
-    summaryLine: "지방세 특례 확대를 통한 공정한 세금 부과 및 지역 발전",
-    id: 1,
-    tag: "기타",
-    billNo: 2213340,
-    proposeDate: "2025-09-26",
-  },
-};
+import { ArrowLeft, Calendar, Building2, Users, Target, Clock, ThumbsUp, ThumbsDown } from "lucide-react";
+import { billsService } from "@/apis/services/bills";
+import type { BillTopVotesItem } from "@/apis/types/bills";
 
 function parseMaybeJsonArray(value: string): string[] {
   try {
@@ -75,13 +25,71 @@ function stripSquareBrackets(text: string): string {
 export const BillDetailPage = () => {
   const { id } = useParams();
   const billId = Number(id);
+  
+  const [bill, setBill] = useState<BillTopVotesItem | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [voting, setVoting] = useState(false);
 
-  const bill = useMemo(() => {
-    if (!billId) return undefined;
-    return dataById[billId];
+  useEffect(() => {
+    const fetchBill = async () => {
+      if (!billId) {
+        setError("잘못된 법안 ID입니다.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const billData = await billsService.getBillById(billId);
+        setBill(billData);
+      } catch (err) {
+        console.error("법안 데이터 로드 실패:", err);
+        setError("법안 데이터를 불러오는데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBill();
   }, [billId]);
 
-  const notFound = !bill;
+  const handleVoteAgree = async () => {
+    if (!billId || voting) return;
+    
+    try {
+      setVoting(true);
+      await billsService.voteAgree(billId);
+      // 투표 후 데이터 다시 로드
+      const updatedBill = await billsService.getBillById(billId);
+      setBill(updatedBill);
+    } catch (err) {
+      console.error("찬성 투표 실패:", err);
+      alert("투표에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setVoting(false);
+    }
+  };
+
+  const handleVoteDisagree = async () => {
+    if (!billId || voting) return;
+    
+    try {
+      setVoting(true);
+      await billsService.voteDisagree(billId);
+      // 투표 후 데이터 다시 로드
+      const updatedBill = await billsService.getBillById(billId);
+      setBill(updatedBill);
+    } catch (err) {
+      console.error("반대 투표 실패:", err);
+      alert("투표에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setVoting(false);
+    }
+  };
+
+  const notFound = !loading && !bill;
   const summaryHighlight = bill
     ? stripSquareBrackets(bill.summaryHighlight)
     : "";
@@ -101,7 +109,25 @@ export const BillDetailPage = () => {
               <span>목록으로 돌아가기</span>
             </Link>
           </div>
-          {notFound ? (
+          {loading ? (
+            <>
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  <p className="text-gray-600">법안 정보를 불러오는 중...</p>
+                </div>
+              </div>
+            </>
+          ) : error ? (
+            <>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">
+                오류가 발생했습니다
+              </h1>
+              <p className="text-gray-600 mb-8">
+                {error}
+              </p>
+            </>
+          ) : notFound ? (
             <>
               <h1 className="text-3xl font-bold text-gray-800 mb-4">
                 법률안을 찾을 수 없습니다
@@ -110,7 +136,7 @@ export const BillDetailPage = () => {
                 요청하신 법률안이 존재하지 않거나 잘못된 경로입니다.
               </p>
             </>
-          ) : (
+          ) : bill ? (
             <>
               <div className="max-w-[960px] mx-auto text-left mb-20">
                 <div className="inline-flex items-center gap-3 mb-3">
@@ -178,22 +204,10 @@ export const BillDetailPage = () => {
                           )
                         )}
                       </ul>
-                    </div>
-
-                    <div className="px-6 py-5 border border-gray-200 rounded-xl bg-white mb-6">
-                      <h1 className="text-[22px] font-bold text-gray-800 mb-2">
-                        기대 효과
-                      </h1>
-                      <ul className="list-disc list-inside space-y-2 text-gray-500 text-sm">
-                        {parseMaybeJsonArray(bill.summaryEffect).map(
-                          (line, idx) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <span className="w-2 h-2 mt-1.5 mr-2 rounded-full bg-blue-500"></span>
-                              <span className="text-gray-600">{line}</span>
-                            </li>
-                          )
-                        )}
-                      </ul>
+                      
+                     <div className="flex items-center gap-2">
+                         <Target className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                         <p className="text-sm text-gray-500 leading-relaxed break-words max-w-xs">{summaryHighlight}</p>
                     </div>
 
                     <div className="px-6 py-5 border border-gray-200 rounded-xl bg-white mb-6">
@@ -286,31 +300,65 @@ export const BillDetailPage = () => {
                       </div>
                     </div>
 
-                    <p className="text-sm text-gray-500 mb-6 text-center">
-                      총 {bill.totalCount.toLocaleString()}명 참여
-                    </p>
+                    <div className="col-span-1 px-6 py-5 border border-gray-200 rounded-xl bg-white mb-6 sticky top-24 h-fit">
+                        <h1 className="text-[22px] font-bold text-gray-800 mb-1">시민 의견 투표</h1>
+                        <p className="text-sm text-gray-500 mb-4">이 법률안에 대한 의견을 투표해주세요.</p>
 
-                    <div className="border-t border-gray-200 mb-6"></div>
+                        <div className="mb-4">
+                            <div className="flex justify-between text-sm mb-3">
+                                <span className="text-blue-600">찬성 {bill.totalCount > 0 ? ((bill.agreeCount / bill.totalCount) * 100).toFixed(1) : '0.0'}%</span>
+                                <span className="text-red-500">반대 {bill.totalCount > 0 ? ((bill.disagreeCount / bill.totalCount) * 100).toFixed(1) : '0.0'}%</span>
+                            </div>
+                            <div className="w-full h-4 bg-gray-200 rounded-full flex overflow-hidden">
+                                {bill.totalCount > 0 ? (
+                                    <>
+                                        <div
+                                            className="bg-blue-500 h-4"
+                                            style={{ width: `${(bill.agreeCount / bill.totalCount) * 100}%` }}
+                                        ></div>
+                                        <div
+                                            className="bg-red-500 h-4"
+                                            style={{ width: `${(bill.disagreeCount / bill.totalCount) * 100}%` }}
+                                        ></div>
+                                    </>
+                                ) : (
+                                    <div className="bg-gray-300 h-4 w-full"></div>
+                                )}
+                            </div>
+                        </div>
 
-                    <div className="mb-4 flex flex-col gap-3">
-                      <button className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors">
-                        <ThumbsUp className="w-4 h-4 text-gray-700" />
-                        <span className="font-medium text-gray-700 text-sm">
-                          찬성합니다
-                        </span>
-                      </button>
-                      <button className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-red-50 transition-colors">
-                        <ThumbsDown className="w-4 h-4 text-gray-700" />
-                        <span className="font-medium text-gray-700 text-sm">
-                          반대합니다
-                        </span>
-                      </button>
+                        <p className="text-sm text-gray-500 mb-6 text-center">총 {bill.totalCount.toLocaleString()}명 참여</p>
+
+                        <div className="border-t border-gray-200 mb-6"></div>
+
+                        <div className="mb-4 flex flex-col gap-3">
+                            <button 
+                                onClick={handleVoteAgree}
+                                disabled={voting}
+                                className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ThumbsUp className="w-4 h-4 text-gray-700" />
+                                <span className="font-medium text-gray-700 text-sm">
+                                    {voting ? "투표 중..." : "찬성합니다"}
+                                </span>
+                            </button>
+                            <button 
+                                onClick={handleVoteDisagree}
+                                disabled={voting}
+                                className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ThumbsDown className="w-4 h-4 text-gray-700" />
+                                <span className="font-medium text-gray-700 text-sm">
+                                    {voting ? "투표 중..." : "반대합니다"}
+                                </span>
+                            </button>
+                        </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
+            </div>            
+          </>
+          ) : null}
         </div>
       </div>
       <div className="bg-gray-50 p-8">
