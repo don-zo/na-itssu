@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/meetings")
 @RequiredArgsConstructor
@@ -36,6 +38,23 @@ public class MeetingController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("회의 목록 조회 실패", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
+     * 최신 회의 1건 조회
+     * GET /api/meetings/latest
+     */
+    @GetMapping("/latest")
+    public ResponseEntity<MeetingResponse> getLatestMeeting() {
+        log.info("최신 회의 1건 조회 요청");
+        try {
+            Optional<MeetingResponse> latest = meetingService.getLatestMeeting();
+            return latest.map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.noContent().build());
+        } catch (Exception e) {
+            log.error("최신 회의 조회 실패", e);
             return ResponseEntity.internalServerError().build();
         }
     }

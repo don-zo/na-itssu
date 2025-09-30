@@ -43,4 +43,12 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
            "CASE WHEN m.confDate IS NOT NULL AND m.confDate != '' " +
            "THEN m.confDate ELSE '1900-01-01' END DESC, m.createdAt DESC, m.id DESC")
     List<Meeting> findByCursorOrderByConfDateDescCreatedAtDescIdDesc(Long cursor, Pageable pageable);
+
+    /**
+     * 최신 회의 1건 조회
+     */
+    @Query("SELECT m FROM Meeting m ORDER BY " +
+           "CASE WHEN m.confDate IS NOT NULL AND m.confDate != '' " +
+           "THEN m.confDate ELSE '1900-01-01' END DESC, m.createdAt DESC, m.id DESC")
+    Page<Meeting> findLatest(Pageable pageable);
 }
