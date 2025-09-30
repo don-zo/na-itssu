@@ -6,6 +6,7 @@ export interface ChatMessage {
   message: string;
   sessionId: string;
   billId?: number;
+  meetingId?: number;
 }
 
 export interface ChatResponse {

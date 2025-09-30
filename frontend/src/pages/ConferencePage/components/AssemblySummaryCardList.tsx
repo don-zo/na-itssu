@@ -20,7 +20,7 @@ export const AssemblySummaryCardList = ({
             discussion_items={item.discussion_items}
             pdfLinkUrl={item.pdf_link_url}
             vodLinkUrl={item.vod_link_url}
-            conferenceId={item.conf_id}
+            conferenceId={item.id}
           />
         ))}
       </div>
