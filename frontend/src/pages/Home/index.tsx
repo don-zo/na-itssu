@@ -192,8 +192,8 @@ function TopBillsSection({
   // 첫 번째 카드는 HOT 섹션에서 사용하므로 나머지 3개만 사용
   const remainingBills = topBills ? topBills.slice(1, 4) : [];
 
-  // 무한 루프를 위해 동일한 배열을 두 번 이어 붙임
-  const marqueeItems = [...remainingBills, ...remainingBills];
+  // 무한 루프를 위해 동일한 배열을 세 번 이어 붙임
+  const marqueeItems = [...remainingBills, ...remainingBills, ...remainingBills];
 
   return (
     <>
