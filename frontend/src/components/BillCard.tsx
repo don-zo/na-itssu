@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Calendar, Users, ThumbsUp, ThumbsDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export interface BillCardProps {
+  id: number;
   category: string;
   title: string;
   date: string;
@@ -11,9 +13,12 @@ export interface BillCardProps {
   disagreeRate: number;
   width: string;
   isHot?: boolean;
+  onAgreeClick?: () => void;
+  onDisagreeClick?: () => void;
 }
 
 const BillCard: React.FC<BillCardProps> = ({
+  id,
   category,
   title,
   date,
@@ -23,7 +28,11 @@ const BillCard: React.FC<BillCardProps> = ({
   disagreeRate,
   width = "360px",
   isHot = false,
+  onAgreeClick,
+  onDisagreeClick,
 }) => {
+  const navigate = useNavigate();
+
   const [totalVotes, setTotalVotes] = useState(participants);
   const [agreeVotes, setAgreeVotes] = useState(
     Math.round((participants * agreeRate) / 100)
@@ -47,6 +56,8 @@ const BillCard: React.FC<BillCardProps> = ({
     setTotalVotes(totalVotes + 1);
     setHasVoted(true);
 
+    if (onAgreeClick) onAgreeClick();
+
     setShowSnackbar(true);
     setTimeout(() => setShowSnackbar(false), 2000);
   };
@@ -57,8 +68,14 @@ const BillCard: React.FC<BillCardProps> = ({
     setTotalVotes(totalVotes + 1);
     setHasVoted(true);
 
+    if (onDisagreeClick) onDisagreeClick();
+
     setShowSnackbar(true);
     setTimeout(() => setShowSnackbar(false), 2000);
+  };
+
+  const handleDetail = () => {
+    navigate(`/bills/${id}`);
   };
 
   return (
@@ -80,15 +97,15 @@ const BillCard: React.FC<BillCardProps> = ({
       </div>
 
       <div className="text-left">
-        <h3 className="text-black text-lg font-semibold pl-1">{title}</h3>
-        <p className="text-sm text-gray-500 pl-1 pt-5 line-clamp-3 h-[4.8rem]">
+        <h3 className="text-black text-lg font-semibold pl-1 line-clamp-2 leading-6 h-[3rem] mb-2">{title}</h3>
+        <p className="text-sm text-gray-500 pl-1 mt-2 line-clamp-3 h-[4.8rem]">
           {description}
         </p>
       </div>
 
       <div className="flex flex-col gap-3">
-        <div className="flex justify-between items-center text-sm text-gray-800">
-          <span className="px-1 pt-3 text-sm font-medium">현재 투표 현황</span>
+        <div className="flex justify-between items-center text-sm text-gray-800 pt-3">
+          <span className="px-1 text-sm font-medium">현재 투표 현황</span>
           <div className="flex items-center gap-1 font-semibold">
             <Users className="w-4 h-4" />
             <span>{totalVotes.toLocaleString()}명 참여</span>
@@ -150,7 +167,10 @@ const BillCard: React.FC<BillCardProps> = ({
         </div>
       )}
 
-      <button className="mt-2 py-2 rounded-xl bg-blue-50 text-blue-700 font-medium hover:bg-blue-100">
+      <button 
+        className="mt-2 py-2 rounded-xl bg-blue-50 text-blue-700 font-medium hover:bg-blue-100"
+        onClick={handleDetail}
+      >
         법률안 자세히 보기
       </button>
     </div>

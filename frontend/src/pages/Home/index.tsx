@@ -60,6 +60,7 @@ export const Home = () => {
                     const disagreeRate = total > 0 ? (firstBill.disagreeCount / total) * 100 : 0;
                     return (
                       <BillCard
+                        id={firstBill.id}
                         category={firstBill.tag || "기타"}
                         title={firstBill.billName}
                         date={firstBill.proposeDate.replaceAll("-", ".")}
@@ -153,6 +154,7 @@ function TopBillsSection({ topBills, isLoading, isError }: { topBills: any[] | u
               return (
                 <BillCard
                   key={key}
+                  id={item.id}
                   category={item.tag || "기타"}
                   title={item.billName}
                   date={item.proposeDate.replaceAll("-", ".")}
