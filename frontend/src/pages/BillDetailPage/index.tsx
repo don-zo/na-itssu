@@ -274,13 +274,14 @@ export const BillDetailPage = () => {
                     </div>
                   </div>
 
-                  <div className="col-span-1 px-6 py-5 border border-gray-200 rounded-xl bg-white mb-6 sticky top-24 h-fit">
-                    <h1 className="text-[22px] font-bold text-gray-800 mb-1">
+                  <div className="col-span-1">
+                    <div className="px-6 py-5 border border-gray-200 rounded-xl bg-white mb-4 sticky top-24 h-fit">
+                      <h1 className="text-[22px] font-bold text-gray-800 mb-1">
                       시민 의견 투표
-                    </h1>
-                    <p className="text-sm text-gray-500 mb-4">
-                      이 법률안에 대한 의견을 투표해주세요.
-                    </p>
+                      </h1>
+                      <p className="text-sm text-gray-500 mb-4">
+                        이 법률안에 대한 의견을 투표해주세요.
+                      </p>
 
                     <div className="mb-4">
                       <div className="flex justify-between text-sm mb-3">
@@ -321,29 +322,41 @@ export const BillDetailPage = () => {
 
                     <div className="border-t border-gray-200 mb-6"></div>
 
-                    <div className="mb-4 flex flex-col gap-3">
-                      <button 
-                        onClick={handleVoteAgree}
-                        disabled={voting || hasVoted}
-                        className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ThumbsUp className="w-4 h-4 text-gray-700" />
-                        <span className="font-medium text-gray-700 text-sm">
-                          {voting ? "투표 중..." : hasVoted ? "투표 완료" : "찬성합니다"}
-                        </span>
-                      </button>
-                      <button 
-                        onClick={handleVoteDisagree}
-                        disabled={voting || hasVoted}
-                        className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ThumbsDown className="w-4 h-4 text-gray-700" />
-                        <span className="font-medium text-gray-700 text-sm">
-                          {voting ? "투표 중..." : hasVoted ? "투표 완료" : "반대합니다"}
-                        </span>
-                      </button>
+                      <div className="mb-2 flex flex-col gap-3">
+                        <button 
+                          onClick={handleVoteAgree}
+                          disabled={voting || hasVoted}
+                          className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <ThumbsUp className="w-4 h-4 text-blue-600" />
+                          <span className="font-medium text-gray-700 text-sm">
+                            {voting ? "투표 중..." : hasVoted ? "투표 완료" : "찬성합니다"}
+                          </span>
+                        </button>
+                        <button 
+                          onClick={handleVoteDisagree}
+                          disabled={voting || hasVoted}
+                          className="w-full flex items-center justify-center gap-2 py-3 border border-gray-200 bg-gray-50 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <ThumbsDown className="w-4 h-4 text-red-600" />
+                          <span className="font-medium text-gray-700 text-sm">
+                            {voting ? "투표 중..." : hasVoted ? "투표 완료" : "반대합니다"}
+                          </span>
+                        </button>
+                      </div>
                     </div>
+
+                    <a
+                      href={`https://search.naver.com/search.naver?query=${encodeURIComponent(bill.billName)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full px-6 py-3 border border-gray-200 text-[17px] rounded-xl bg-white font-semibold hover:bg-gray-50 text-center inline-block"
+                    >
+                      관련 내용 검색
+                    </a>
                   </div>
+
+                
                 </div>
               </div>            
             </>
