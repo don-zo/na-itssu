@@ -2,7 +2,7 @@ import AssemblySummaryCard from "@/components/AssemblySummaryCard";
 import BillCard from "@/components/BillCard";
 import Header from "@/components/Header";
 import Chatbot from "@/components/chatbot";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { TrendingUp, Clock, ArrowRight } from "lucide-react";
 import { ROUTES } from "@/routes/path";
 import { useQuery } from "@tanstack/react-query";
@@ -11,19 +11,27 @@ import { useLatestMeeting } from "@/apis/hooks/useMeetings";
 
 export const Home = () => {
   const navigate = useNavigate();
-  const { data: topBills, isLoading, isError } = useQuery({
+  const {
+    data: topBills,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["bills", "top", 4],
     queryFn: () => billsService.getTopNByVotes(4),
   });
 
-  const { data: latestMeeting, isLoading: isMeetingLoading, isError: isMeetingError } = useLatestMeeting();
+  const {
+    data: latestMeeting,
+    isLoading: isMeetingLoading,
+    isError: isMeetingError,
+  } = useLatestMeeting();
 
   function handleClick() {
-    navigate(ROUTES.BILLS.DEFAULT)
+    navigate(ROUTES.BILLS.DEFAULT);
   }
 
   function handleConferenceClick() {
-    navigate(ROUTES.CONFERENCE.DEFAULT)
+    navigate(ROUTES.CONFERENCE.DEFAULT);
   }
 
   return (
@@ -38,7 +46,7 @@ export const Home = () => {
           }}
         >
           <div className="max-w-5xl mx-auto items-center text-white text-center">
-            <h1 className="text-[48px] font-bold leading-none mt-15 mb-4">
+            <h1 className="text-[48px] font-extrabold leading-tight mt-15 mb-4">
               시민의 목소리가 만드는
               <br />더 나은 대한민국
             </h1>
@@ -57,21 +65,34 @@ export const Home = () => {
                   <span className="text-white/80">불러오는 중...</span>
                 )}
                 {isError && (
-                  <span className="text-red-100">데이터를 불러오지 못했습니다.</span>
+                  <span className="text-red-100">
+                    데이터를 불러오지 못했습니다.
+                  </span>
                 )}
-                {!isLoading && !isError && topBills && topBills.length > 0 && (
+                {!isLoading &&
+                  !isError &&
+                  topBills &&
+                  topBills.length > 0 &&
                   (() => {
                     const firstBill = topBills[0];
-                    const total = firstBill.totalCount ?? (firstBill.agreeCount + firstBill.disagreeCount);
-                    const agreeRate = total > 0 ? (firstBill.agreeCount / total) * 100 : 0;
-                    const disagreeRate = total > 0 ? (firstBill.disagreeCount / total) * 100 : 0;
+                    const total =
+                      firstBill.totalCount ??
+                      firstBill.agreeCount + firstBill.disagreeCount;
+                    const agreeRate =
+                      total > 0 ? (firstBill.agreeCount / total) * 100 : 0;
+                    const disagreeRate =
+                      total > 0 ? (firstBill.disagreeCount / total) * 100 : 0;
                     return (
                       <BillCard
                         id={firstBill.id}
                         category={firstBill.tag || "기타"}
                         title={firstBill.billName}
                         date={firstBill.proposeDate.replaceAll("-", ".")}
-                        description={firstBill.summaryLine || firstBill.summaryContent || ""}
+                        description={
+                          firstBill.summaryLine ||
+                          firstBill.summaryContent ||
+                          ""
+                        }
                         participants={total}
                         agreeRate={agreeRate}
                         disagreeRate={disagreeRate}
@@ -80,8 +101,7 @@ export const Home = () => {
                         initialHasVoted={firstBill.hasVoted}
                       />
                     );
-                  })()
-                )}
+                  })()}
               </div>
             </div>
           </div>
@@ -105,7 +125,9 @@ export const Home = () => {
         )}
         {isMeetingError && (
           <div className="text-center">
-            <span className="text-red-500">회의 정보를 불러오지 못했습니다.</span>
+            <span className="text-red-500">
+              회의 정보를 불러오지 못했습니다.
+            </span>
           </div>
         )}
         {!isMeetingLoading && !isMeetingError && latestMeeting && (
@@ -133,15 +155,22 @@ export const Home = () => {
           </span>
         </div>
         <h1 className="text-[30px] font-bold mt-3">투표율이 높은 법률안</h1>
-        <span className="text-[17px] text-gray-500 mt-1 mb-8">시민들의 관심이 많은 법률안에 참여해보세요!</span>
-        <TopBillsSection topBills={topBills} isLoading={isLoading} isError={isError} />
+        <span className="text-[17px] text-gray-500 mt-1 mb-8">
+          시민들의 관심이 많은 법률안에 참여해보세요!
+        </span>
+        <TopBillsSection
+          topBills={topBills}
+          isLoading={isLoading}
+          isError={isError}
+        />
       </div>
       <div className="flex justify-center mt-8 mb-15">
-        <button onClick={handleClick}
-            className="flex items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-[15px] font-medium text-gray-700 hover:bg-gray-100"
+        <button
+          onClick={handleClick}
+          className="flex items-center justify-center rounded-lg border border-gray-200 px-4 py-2 text-[15px] font-medium text-gray-700 hover:bg-gray-100"
         >
-            모든 법률안 보기
-            <ArrowRight className="h-4 w-4 ml-3 text-gray-700" />
+          모든 법률안 보기
+          <ArrowRight className="h-4 w-4 ml-3 text-gray-700" />
         </button>
       </div>
       <Chatbot />
@@ -151,7 +180,15 @@ export const Home = () => {
 
 export default Home;
 
-function TopBillsSection({ topBills, isLoading, isError }: { topBills: any[] | undefined, isLoading: boolean, isError: boolean }) {
+function TopBillsSection({
+  topBills,
+  isLoading,
+  isError,
+}: {
+  topBills: any[] | undefined;
+  isLoading: boolean;
+  isError: boolean;
+}) {
   // 첫 번째 카드는 HOT 섹션에서 사용하므로 나머지 3개만 사용
   const remainingBills = topBills ? topBills.slice(1, 4) : [];
 
@@ -160,41 +197,45 @@ function TopBillsSection({ topBills, isLoading, isError }: { topBills: any[] | u
 
   return (
     <>
-      {isLoading && (
-        <span className="text-white/80">불러오는 중...</span>
-      )}
+      {isLoading && <span className="text-white/80">불러오는 중...</span>}
       {isError && (
         <span className="text-red-100">데이터를 불러오지 못했습니다.</span>
       )}
-      {!isLoading && !isError && remainingBills && remainingBills.length > 0 && (
-        <div className="marquee-container">
-          <div className="marquee-track">
-            {marqueeItems.map((item: any, index: number) => {
-              const total = item.totalCount ?? (item.agreeCount + item.disagreeCount);
-              const agreeRate = total > 0 ? (item.agreeCount / total) * 100 : 0;
-              const disagreeRate = total > 0 ? (item.disagreeCount / total) * 100 : 0;
-              const key = `${item.id}-${index}`;
-              return (
-                <BillCard
-                  key={key}
-                  id={item.id}
-                  category={item.tag || "기타"}
-                  title={item.billName}
-                  date={item.proposeDate.replaceAll("-", ".")}
-                  description={item.summaryLine || item.summaryContent || ""}
-                  participants={total}
-                  agreeRate={agreeRate}
-                  disagreeRate={disagreeRate}
-                  width="360px"
-                  initialHasVoted={item.hasVoted}
-                />
-              );
-            })}
+      {!isLoading &&
+        !isError &&
+        remainingBills &&
+        remainingBills.length > 0 && (
+          <div className="marquee-container">
+            <div className="marquee-track">
+              {marqueeItems.map((item: any, index: number) => {
+                const total =
+                  item.totalCount ?? item.agreeCount + item.disagreeCount;
+                const agreeRate =
+                  total > 0 ? (item.agreeCount / total) * 100 : 0;
+                const disagreeRate =
+                  total > 0 ? (item.disagreeCount / total) * 100 : 0;
+                const key = `${item.id}-${index}`;
+                return (
+                  <BillCard
+                    key={key}
+                    id={item.id}
+                    category={item.tag || "기타"}
+                    title={item.billName}
+                    date={item.proposeDate.replaceAll("-", ".")}
+                    description={item.summaryLine || item.summaryContent || ""}
+                    participants={total}
+                    agreeRate={agreeRate}
+                    disagreeRate={disagreeRate}
+                    width="360px"
+                    initialHasVoted={item.hasVoted}
+                  />
+                );
+              })}
+            </div>
+            <div className="marquee-fade-left" />
+            <div className="marquee-fade-right" />
           </div>
-          <div className="marquee-fade-left" />
-          <div className="marquee-fade-right" />
-        </div>
-      )}
+        )}
     </>
   );
 }
