@@ -8,7 +8,7 @@ import type { SortType } from "@/pages/BillPage/components/FilterButtons";
 import TagButtons from "@/pages/BillPage/components/TagButtons";
 import type { TagType } from "@/pages/BillPage/components/TagButtons";
 import Chatbot from "@/components/chatbot";
-import { useBills, useBillsByVotes, useBillSearch } from "@/apis/hooks/useBills";
+import { useBills, useBillSearch } from "@/apis/hooks/useBills";
 import type { BillPageResponse } from "@/apis/types/bills";
 
 export const BillPage = () => {
@@ -56,25 +56,15 @@ export const BillPage = () => {
     searchQuery || undefined,
     apiParams.page
   );
-  // 투표순 & 전체(태그 없음)일 때는 별도 엔드포인트(/page/by-votes) 사용
-  const useVotesEndpoint = !searchQuery && sortType === "votes" && currentTag === "all";
-
   const { data: listData, isLoading: isLoadingList, error: errorList } = useBills(
-    !searchQuery && !useVotesEndpoint ? apiParams : undefined
+    !searchQuery ? apiParams : undefined
   );
 
-  const { data: votesOnlyData, isLoading: isLoadingVotesOnly, error: errorVotesOnly } =
-    useBillsByVotes(!searchQuery && useVotesEndpoint ? { page: apiParams.page, size: apiParams.size } : undefined);
+  const activeData: BillPageResponse | undefined = searchQuery ? searchData : listData;
 
-  const activeData: BillPageResponse | undefined = searchQuery
-    ? searchData
-    : useVotesEndpoint
-    ? votesOnlyData
-    : listData;
+  const isLoading = searchQuery ? isLoadingSearch : isLoadingList;
 
-  const isLoading = searchQuery ? isLoadingSearch : useVotesEndpoint ? isLoadingVotesOnly : isLoadingList;
-
-  const error = searchQuery ? errorSearch : useVotesEndpoint ? errorVotesOnly : errorList;
+  const error = searchQuery ? errorSearch : errorList;
 
   const totalPages = activeData?.totalPages ?? 0;
   const hasResults = (activeData?.content?.length ?? 0) > 0;
@@ -182,7 +172,7 @@ export const BillPage = () => {
           </div>
         )}
       </div>
-      <div className="bg-gray-50 p-8">
+      <div className="bg-gray-50">
         <Chatbot />
       </div>
     </>
