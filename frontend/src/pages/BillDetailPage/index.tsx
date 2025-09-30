@@ -284,17 +284,23 @@ export const BillDetailPage = () => {
 
                     <div className="mb-4">
                       <div className="flex justify-between text-sm mb-3">
-                        <span className="text-blue-600">
-                          찬성{" "}
-                          {bill.totalCount > 0 ? ((bill.agreeCount / bill.totalCount) * 100).toFixed(1) : '0.0'}%
-                        </span>
-                        <span className="text-red-500">
-                          반대{" "}
-                          {bill.totalCount > 0 ? ((bill.disagreeCount / bill.totalCount) * 100).toFixed(1) : '0.0'}%
-                        </span>
+                        {hasVoted ? (
+                          <>
+                            <span className="text-blue-600">
+                              찬성{" "}
+                              {bill.totalCount > 0 ? ((bill.agreeCount / bill.totalCount) * 100).toFixed(1) : '0.0'}%
+                            </span>
+                            <span className="text-red-500">
+                              반대{" "}
+                              {bill.totalCount > 0 ? ((bill.disagreeCount / bill.totalCount) * 100).toFixed(1) : '0.0'}%
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-gray-500 ml-1">투표 후 결과가 표시됩니다</span>
+                        )}
                       </div>
                       <div className="w-full h-4 bg-gray-200 rounded-full flex overflow-hidden">
-                        {bill.totalCount > 0 ? (
+                        {hasVoted ? (
                           <>
                             <div
                               className="bg-blue-500 h-4"
